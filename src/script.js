@@ -130,24 +130,37 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
+
+
+
+
+// LOOK AT
+function lookAtObject(obj) {
+    var startRotation = new THREE.Euler().copy(camera.rotation);
+    camera.lookAt(obj.position);
+    var endRotation = new THREE.Euler().copy(camera.rotation);
+    camera.rotation.copy(startRotation);
+    // Tween
+    gsap.to(camera.rotation, { x: endRotation.x, y: endRotation.y, z: endRotation.z, duration: 3 })
+}
+
+
+
+
+
 var t = 0
 var p1 = new THREE.Vector3();
 var p2 = new THREE.Vector3();
 var lookAt = new THREE.Vector3();
 var axis = new THREE.Vector3(0, 0, 0);
-var percentage = 0;
-var stopAt = mesh2.position
 var selectSpot = 3
 var pos = 0
 var camPos = new THREE.Vector3(0, 0, 0); // Holds current camera position
-var targetPos = mesh6.position
-var origin = curve.points[selectSpot].position
 var pos = curve.getPointAt((t + 0.001) % 1, p2);
+
 const animate = () => {
-    requestAnimationFrame(animate);
-    // CAMERA FOLLOW
     if (Math.round(curve.points[selectSpot].x * 10) / 10 == Math.round(pos.x * 10) / 10 && Math.round(curve.points[selectSpot].z * 10) / 10 == Math.round(pos.z * 10) / 10) {
-        // camera.lookAt(mesh2.position);
+        lookAtObject(mesh2)
     } else {
         curve.getPointAt(t % 1, p1);
         curve.getPointAt((t + 0.001) % 1, p2);
@@ -157,7 +170,7 @@ const animate = () => {
         camera.lookAt(lookAt);
         camPos = lookAt
     }
-
+    requestAnimationFrame(animate);
     renderer.render(scene, camera);
     return renderer.render(scene, camera);
 }
