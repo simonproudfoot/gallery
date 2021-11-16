@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { VectorKeyframeTrack } from 'three'
+import gsap from 'gsap'
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 // Scene
@@ -137,30 +139,25 @@ var percentage = 0;
 var stopAt = mesh2.position
 var selectSpot = 3
 var pos = 0
+var camPos = new THREE.Vector3(0, 0, 0); // Holds current camera position
+var targetPos = mesh6.position
+var origin = curve.points[selectSpot].position
+var pos = curve.getPointAt((t + 0.001) % 1, p2);
 const animate = () => {
     requestAnimationFrame(animate);
-    // TEST BOX FOLLOW
-    // camera.lookAt(scene.getObjectByName('Cube011').position)
-    // if (Math.round(curve.points[selectSpot].x * 10) / 10 == Math.round(pos.x * 10) / 10 && Math.round(curve.points[selectSpot].z * 10) / 10 == Math.round(pos.z * 10) / 10) {
-    //     camera.lookAt(scene.getObjectByName('Cube011').position)
-    // } else {
-    //     pos = curve.getPointAt(t)
-    //     t += 0.004;
-    //     camera.position.set(pos.x, pos.y, pos.z);
-    // }
-    // TEST END
     // CAMERA FOLLOW
-    var pos = curve.getPointAt((t + 0.001) % 1, p2);
     if (Math.round(curve.points[selectSpot].x * 10) / 10 == Math.round(pos.x * 10) / 10 && Math.round(curve.points[selectSpot].z * 10) / 10 == Math.round(pos.z * 10) / 10) {
-        camera.lookAt(scene.getObjectByName('Cube011').position)
+        // camera.lookAt(mesh2.position);
     } else {
-        t += 0.004;
         curve.getPointAt(t % 1, p1);
         curve.getPointAt((t + 0.001) % 1, p2);
         lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
         camera.position.copy(p1);
+        t += 0.004;
         camera.lookAt(lookAt);
+        camPos = lookAt
     }
+
     renderer.render(scene, camera);
     return renderer.render(scene, camera);
 }
