@@ -2,7 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { VectorKeyframeTrack } from 'three'
+
 import gsap from 'gsap'
 
 // Canvas
@@ -41,22 +41,27 @@ mesh4.name = 'box4'
 mesh4.position.set(17.360, 0, -109.540)
 mesh4.scale.set(5.810, 15.190, 5.000)
 scene.add(mesh4)
+
 // Object 5
-const geometry6 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material6 = new THREE.MeshStandardMaterial({ color: 0x1aff00 })
-const mesh6 = new THREE.Mesh(geometry6, material6)
-mesh6.name = 'box6'
-mesh6.position.set(17.360, 0, -37.480)
-mesh6.scale.set(5.810, 15.190, 5.000)
-scene.add(mesh6)
-// MOVE ME -- TEST
-const geometry5 = new THREE.BoxGeometry(0.3, 0.3, 0.3)
+const geometry5 = new THREE.BoxGeometry(0.3, 1, 0.3)
 const material5 = new THREE.MeshStandardMaterial({ color: 0x1aff00 })
 const mesh5 = new THREE.Mesh(geometry5, material5)
-mesh5.name = 'MoveMe'
-mesh5.position.set(4, 0, -4)
-mesh5.scale.set(20, 20, 20)
+mesh5.name = 'box5'
+mesh5.position.set(17.360, 0, -37.480)
+mesh5.scale.set(5.810, 15.190, 5.000)
 scene.add(mesh5)
+
+// LOOK ATS
+const geometry6 = new THREE.BoxGeometry(0.3, 1, 0.3)
+const material6 = new THREE.MeshStandardMaterial({ color: 0xff0055 })
+const mesh6 = new THREE.Mesh(geometry6, material6)
+mesh6.name = 'lookAt5'
+mesh6.position.set(0.260, 1.610, -86.610)
+mesh6.scale.set(20.000, 3.000, 17.240)
+mesh6.material.wireframe = true
+scene.add(mesh6)
+
+
 // box sizes
 const sizes = {
     width: window.innerWidth,
@@ -91,13 +96,13 @@ loader.load(
 // lights
 var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.5);
 scene.add(hemiLight);
-// var light = new THREE.SpotLight(0xffa95c,4);
-// light.position.set(-50,50,50);
-// light.castShadow = true;
-// scene.add( light );
-// light.shadow.bias = -0.0001;
-// light.shadow.mapSize.width = 1024*4;
-// light.shadow.mapSize.height = 1024*4;
+var light = new THREE.SpotLight(0xffa95c, 4);
+light.position.set(-50, 50, 50);
+light.castShadow = true;
+scene.add(light);
+light.shadow.bias = -0.0001;
+light.shadow.mapSize.width = 1024 * 4;
+light.shadow.mapSize.height = 1024 * 4;
 // Camera
 const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 1, 1000);
 camera.position.z = 5
@@ -109,7 +114,8 @@ const curve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(mesh2.position.x, 0, mesh2.position.z),
     new THREE.Vector3(mesh3.position.x, 0, mesh3.position.z),
     new THREE.Vector3(mesh4.position.x, 0, mesh4.position.z),
-    new THREE.Vector3(mesh6.position.x, 0, mesh6.position.z),
+    new THREE.Vector3(mesh5.position.x, 0, mesh5.position.z),
+    //new THREE.Vector3(mesh6.position.x, 0, mesh6.position.z),
     //new THREE.Vector3( mesh1.position.x, 0, mesh1.position.z ),
 ]);
 curve.closed = true;
@@ -126,13 +132,23 @@ const renderer = new THREE.WebGLRenderer({
     antialias: true,
     castShadow: true
 })
-//const controls = new OrbitControls(camera, renderer.domElement);
+const controls = new OrbitControls(camera, renderer.domElement);
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
 
 
+var classname = document.getElementsByClassName("goTO");
+Array.from(classname).forEach((el) => {
+    el.addEventListener("click", changeObject);
+});
 
+
+function changeObject(e) {
+    playing = true
+    selectSpot = e.currentTarget.getAttribute("data-goTo") - 1
+    lookAtMesh = e.currentTarget.getAttribute("data-lookAt")
+}
 
 // LOOK AT
 function lookAtObject(obj) {
@@ -141,37 +157,42 @@ function lookAtObject(obj) {
     var endRotation = new THREE.Euler().copy(camera.rotation);
     camera.rotation.copy(startRotation);
     // Tween
-    gsap.to(camera.rotation, { x: endRotation.x, y: endRotation.y, z: endRotation.z, duration: 3 })
+    gsap.to(camera.rotation, { x: endRotation.x, y: endRotation.y, z: endRotation.z, duration: 3 }).then(() => {
+        playing = false
+    })
 }
-
-
-
-
 
 var t = 0
 var p1 = new THREE.Vector3();
 var p2 = new THREE.Vector3();
 var lookAt = new THREE.Vector3();
 var axis = new THREE.Vector3(0, 0, 0);
-var selectSpot = 3
+var selectSpot = 0
+var lookAtMesh = ''
 var pos = 0
+var playing = false
 var camPos = new THREE.Vector3(0, 0, 0); // Holds current camera position
 var pos = curve.getPointAt((t + 0.001) % 1, p2);
 
+
 const animate = () => {
-    if (Math.round(curve.points[selectSpot].x * 10) / 10 == Math.round(pos.x * 10) / 10 && Math.round(curve.points[selectSpot].z * 10) / 10 == Math.round(pos.z * 10) / 10) {
-        lookAtObject(mesh2)
-    } else {
-        curve.getPointAt(t % 1, p1);
-        curve.getPointAt((t + 0.001) % 1, p2);
-        lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
-        camera.position.copy(p1);
-        t += 0.004;
-        camera.lookAt(lookAt);
-        camPos = lookAt
+    if (playing) {
+
+        if (camera.position.distanceTo(curve.points[selectSpot]) < 20) {
+            lookAtObject(scene.getObjectByName(lookAtMesh))
+        } else {
+            t += 0.003;
+            curve.getPointAt(t % 1, p1);
+            curve.getPointAt((t + 0.001) % 1, p2);
+            lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
+            camera.position.copy(p1);
+            camera.lookAt(lookAt);
+            camPos = lookAt
+        }
     }
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
     return renderer.render(scene, camera);
 }
+
 animate()
