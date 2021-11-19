@@ -55,7 +55,7 @@ scene.add(mesh5)
 
 // LOOK ATS
 const geometry10 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material10 = new THREE.MeshStandardMaterial({ color: 0xff0055 })
+const material10 = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
 const mesh10 = new THREE.Mesh(geometry10, material10)
 mesh10.name = 'lookAt1'
 mesh10.position.set(-0.070, 2.070, 7.500)
@@ -65,7 +65,7 @@ scene.add(mesh10)
 
 
 const geometry7 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material7 = new THREE.MeshStandardMaterial({ color: 0xff0055 })
+const material7 = new THREE.MeshStandardMaterial({ color: 0xd83dff })
 const mesh7 = new THREE.Mesh(geometry7, material7)
 mesh7.name = 'lookAt2'
 mesh7.position.set(-63.670, 1.300, 5.110)
@@ -74,7 +74,7 @@ mesh7.material.wireframe = true
 scene.add(mesh7)
 
 const geometry8 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material8 = new THREE.MeshStandardMaterial({ color: 0xff0055 })
+const material8 = new THREE.MeshStandardMaterial({ color: 0x4dff3d })
 const mesh8 = new THREE.Mesh(geometry8, material8)
 mesh8.name = 'lookAt3'
 mesh8.position.set(-61.620, 1.300, -87.900)
@@ -84,27 +84,13 @@ scene.add(mesh8)
 
 
 const geometry9 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material9 = new THREE.MeshStandardMaterial({ color: 0xff0055 })
+const material9 = new THREE.MeshStandardMaterial({ color: 0xffbb3d })
 const mesh9 = new THREE.Mesh(geometry9, material9)
 mesh9.name = 'lookAt4'
 mesh9.position.set(0.260, 1.610, -86.610)
 mesh9.scale.set(20.000, 3.000, 17.240)
 mesh9.material.wireframe = true
 scene.add(mesh9)
-
-
-if (window.location.hash) {
-    const geometryTest = new THREE.BoxGeometry(0.3, 1, 0.3)
-    const materialTest = new THREE.MeshStandardMaterial({ color: 0xff0055 })
-    const meshTest = new THREE.Mesh(geometry9, material9)
-    meshTest.position.set(0.260, 1.610, -86.610)
-    meshTest.scale.set(20.000, 3.000, 17.240)
-    meshTest.material.wireframe = true
-    meshTest.name = 'test cam'
-    scene.add(meshTest)
-}
-
-
 
 
 // box sizes
@@ -146,12 +132,8 @@ scene.add(light);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 1, 1000);
+camera.position.set(-0.603, 1.955, 29.095)
 scene.add(camera)
-// const helper = new THREE.CameraHelper(camera);
-// scene.add(helper);
-
-
-
 //Create a closed wavey loop
 const curve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(mesh1.position.x, 0, mesh1.position.z),
@@ -201,7 +183,7 @@ function lookAtObject(obj) {
     gsap.to(camera.rotation, { x: endRotation.x, y: endRotation.y, z: endRotation.z, duration: 1 }).then(() => {
         playing = false
         lookAtMesh = ''
-
+        
     })
 }
 
@@ -218,33 +200,25 @@ var camPos = new THREE.Vector3(0, 0, 0); // Holds current camera position
 var pos = curve.getPointAt((t + 0.001) % 1, p2);
 var pause = false
 
-if (scene.getObjectByName('lookAt1')) {
-    camera.lookAt(scene.getObjectByName('lookAt1'))
-}
-
-camera.position.set(mesh1.position.x, mesh1.position.y, mesh1.position.z)
+//camera.lookAt
 
 const animate = () => {
-
     if (playing) {
-        if (!window.location.hash) {
-            if (!window.location.hash) {
-                if (camera.position.distanceTo(curve.points[selectSpot]) < 2) {
-                    if (scene.getObjectByName(lookAtMesh)) {
-                        lookAtObject(scene.getObjectByName(lookAtMesh))
-                    }
-                } else {
-                    t += 0.003;
-                    curve.getPointAt(t % 1, p1);
-                    curve.getPointAt((t + 0.001) % 1, p2);
-                    lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
-                    camera.position.copy(p1);
-                    camera.lookAt(lookAt);
-                    camPos = lookAt
-                }
-            }
-        }else{
+        if (camera.position.distanceTo(curve.points[selectSpot]) < 2) {
+            if(scene.getObjectByName(lookAtMesh)){
+                lookAtObject(scene.getObjectByName(lookAtMesh))
             
+            }
+
+           
+        } else {
+            t += 0.003;
+            curve.getPointAt(t % 1, p1);
+            curve.getPointAt((t + 0.001) % 1, p2);
+            lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
+            camera.position.copy(p1);
+            camera.lookAt(lookAt);
+            camPos = lookAt
         }
     }
     requestAnimationFrame(animate);
