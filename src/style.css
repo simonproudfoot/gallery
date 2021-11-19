@@ -8,3 +8,13 @@ canvas {
 html, body{
     margin: 0;
 }
+
+.controls{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    height: 20px;
+    width: 400px;
+
+}
