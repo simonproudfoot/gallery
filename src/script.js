@@ -2,8 +2,13 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-
 import gsap from 'gsap'
+import * as dat from 'lil-gui'
+
+const gui = new dat.GUI()
+
+
+
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -42,56 +47,176 @@ mesh4.position.set(17.360, 0, -109.540)
 mesh4.scale.set(5.000, 5.000, 5.000)
 scene.add(mesh4)
 
-// Object 5
+
+// Entrance 
+const geometryEntrance = new THREE.BoxGeometry(0.1, 0.1, 0.1)
+const materialEntrance = new THREE.MeshStandardMaterial({ color: 0x1aff00 })
+const meshEntrance = new THREE.Mesh(geometryEntrance, materialEntrance)
+meshEntrance.name = 'Path entrance'
+meshEntrance.position.set(17.360, 0, -37.480)
+meshEntrance.scale.set(5.000, 5.000, 5.000)
+scene.add(meshEntrance)
+
+var distanceBetween = 40
+// Artifact 1
+const artifact1Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact1Material = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
+const Artifact1 = new THREE.Mesh(artifact1Geometry, artifact1Material)
+Artifact1.name = 'Artifact1'
+Artifact1.position.set(29, 8, 20)
+Artifact1.material.wireframe = true
+Artifact1.scale.set(1, 18, 18)
+scene.add(Artifact1)
+const Artifact1dat = gui.addFolder('Artifact 1')
+Artifact1dat.add(Artifact1.position, 'x', "slider").name("Position X");
+Artifact1dat.add(Artifact1.position, 'y').name("Position Y");
+Artifact1dat.add(Artifact1.position, 'z').name("Position Z");
+Artifact1dat.add(Artifact1.scale, 'x').name("Scale X");
+Artifact1dat.add(Artifact1.scale, 'y').name("Scale Y");
+Artifact1dat.add(Artifact1.scale, 'z').name("Scale Z");
+Artifact1dat.close()
+
+// Artifact 2
+const artifact2Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact2Material = new THREE.MeshStandardMaterial({ color: 0xd83dff })
+const Artifact2 = new THREE.Mesh(artifact2Geometry, artifact2Material)
+Artifact2.name = 'Artifact2'
+Artifact2.position.set(29, 8, Artifact1.position.z - distanceBetween)
+Artifact2.material.wireframe = true
+Artifact2.scale.set(1, 18, 18)
+scene.add(Artifact2)
+const Artifact2dat = gui.addFolder('Artifact 2')
+Artifact2dat.add(Artifact2.position, 'x', "slider").name("Position X");
+Artifact2dat.add(Artifact2.position, 'y').name("Position Y");
+Artifact2dat.add(Artifact2.position, 'z').name("Position Z");
+Artifact2dat.add(Artifact2.scale, 'x').name("Scale X");
+Artifact2dat.add(Artifact2.scale, 'y').name("Scale Y");
+Artifact2dat.add(Artifact2.scale, 'z').name("Scale Z");
+Artifact2dat.close()
+
+
+// Artifact 2 stopper
 const geometry5 = new THREE.BoxGeometry(0.1, 0.1, 0.1)
 const material5 = new THREE.MeshStandardMaterial({ color: 0x1aff00 })
 const mesh5 = new THREE.Mesh(geometry5, material5)
-mesh5.name = 'box5'
-mesh5.position.set(17.360, 0, -37.480)
+mesh5.name = 'Artifact2Stopper'
+mesh5.position.set(Artifact2.position.x - 20, 0, Artifact2.position.z)
 mesh5.scale.set(5.000, 5.000, 5.000)
 scene.add(mesh5)
 
 
+// Artifact 3
+const artifact3Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact3Material = new THREE.MeshStandardMaterial({ color: 0x4dff3d })
+const artifact3 = new THREE.Mesh(artifact3Geometry, artifact3Material)
+artifact3.name = 'artifact3'
+artifact3.position.set(29, 8, Artifact2.position.z - distanceBetween)
+artifact3.material.wireframe = true
+artifact3.scale.set(1, 18, 18)
+scene.add(artifact3)
+const artifact3dat = gui.addFolder('Artifact 3')
+artifact3dat.add(artifact3.position, 'x', "slider").name("Position X");
+artifact3dat.add(artifact3.position, 'y').name("Position Y");
+artifact3dat.add(artifact3.position, 'z').name("Position Z");
+artifact3dat.add(artifact3.scale, 'x').name("Scale X");
+artifact3dat.add(artifact3.scale, 'y').name("Scale Y");
+artifact3dat.add(artifact3.scale, 'z').name("Scale Z");
+artifact3dat.close()
 
-// LOOK ATS
-const geometry10 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material10 = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
-const mesh10 = new THREE.Mesh(geometry10, material10)
-mesh10.name = 'lookAt1'
-mesh10.position.set(-0.070, 2.070, 7.500)
-mesh10.scale.set(20.000, 3.000, 17.240)
-mesh10.material.wireframe = true
-scene.add(mesh10)
+// Artifact 4
+const artifact4Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact4Material = new THREE.MeshStandardMaterial({ color: 0x03f4fc })
+const artifact4 = new THREE.Mesh(artifact4Geometry, artifact4Material)
+artifact4.name = 'artifact4'
+artifact4.position.set(29, 8, artifact3.position.z - distanceBetween)
+artifact4.material.wireframe = true
+artifact4.scale.set(1, 18, 18)
+scene.add(artifact4)
+const artifact4dat = gui.addFolder('Artifact 4')
+artifact4dat.add(artifact4.position, 'x', "slider").name("Position X");
+artifact4dat.add(artifact4.position, 'y').name("Position Y");
+artifact4dat.add(artifact4.position, 'z').name("Position Z");
+artifact4dat.add(artifact4.scale, 'x').name("Scale X");
+artifact4dat.add(artifact4.scale, 'y').name("Scale Y");
+artifact4dat.add(artifact4.scale, 'z').name("Scale Z");
+artifact4dat.close()
+
+const artifact5Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact5Material = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
+const artifact5 = new THREE.Mesh(artifact5Geometry, artifact5Material)
+artifact5.name = 'artifact5'
+artifact5.position.set(-89, 8, 20)
+artifact5.material.wireframe = true
+artifact5.scale.set(1, 18, 18)
+scene.add(artifact5)
+const artifact5dat = gui.addFolder('Artifact 5')
+artifact5dat.close()
+artifact5dat.add(artifact5.position, 'x', "slider").name("Position X");
+artifact5dat.add(artifact5.position, 'y').name("Position Y");
+artifact5dat.add(artifact5.position, 'z').name("Position Z");
+artifact5dat.add(artifact5.scale, 'x').name("Scale X");
+artifact5dat.add(artifact5.scale, 'y').name("Scale Y");
+artifact5dat.add(artifact5.scale, 'z').name("Scale Z");
+artifact5dat.close()
+
+const artifact6Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact6Material = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
+const artifact6 = new THREE.Mesh(artifact6Geometry, artifact6Material)
+artifact6.name = 'artifact6'
+artifact6.position.set(-89, 8, artifact5.position.z - distanceBetween)
+artifact6.material.wireframe = true
+artifact6.scale.set(1, 18, 18)
+scene.add(artifact6)
+const artifact6dat = gui.addFolder('Artifact 6')
+artifact6dat.close()
+artifact6dat.add(artifact6.position, 'x', "slider").name("Position X");
+artifact6dat.add(artifact6.position, 'y').name("Position Y");
+artifact6dat.add(artifact6.position, 'z').name("Position Z");
+artifact6dat.add(artifact6.scale, 'x').name("Scale X");
+artifact6dat.add(artifact6.scale, 'y').name("Scale Y");
+artifact6dat.add(artifact6.scale, 'z').name("Scale Z");
+artifact6dat.close()
 
 
-const geometry7 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material7 = new THREE.MeshStandardMaterial({ color: 0xd83dff })
-const mesh7 = new THREE.Mesh(geometry7, material7)
-mesh7.name = 'lookAt2'
-mesh7.position.set(-63.670, 1.300, 5.110)
-mesh7.scale.set(20.000, 3.000, 17.240)
-mesh7.material.wireframe = true
-scene.add(mesh7)
+const artifact7Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact7Material = new THREE.MeshStandardMaterial({ color: 0x03f4fc })
+const artifact7 = new THREE.Mesh(artifact7Geometry, artifact7Material)
+artifact7.name = 'artifact7'
+artifact7.position.set(-89, 8, artifact6.position.z - distanceBetween)
+artifact7.material.wireframe = true
+artifact7.scale.set(1, 18, 18)
+scene.add(artifact7)
+const artifact7dat = gui.addFolder('Artifact 7')
+artifact7dat.close()
+artifact7dat.add(artifact7.position, 'x', "slider").name("Position X");
+artifact7dat.add(artifact7.position, 'y').name("Position Y");
+artifact7dat.add(artifact7.position, 'z').name("Position Z");
+artifact7dat.add(artifact7.scale, 'x').name("Scale X");
+artifact7dat.add(artifact7.scale, 'y').name("Scale Y");
+artifact7dat.add(artifact7.scale, 'z').name("Scale Z");
+artifact7dat.close()
 
-const geometry8 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material8 = new THREE.MeshStandardMaterial({ color: 0x4dff3d })
-const mesh8 = new THREE.Mesh(geometry8, material8)
-mesh8.name = 'lookAt3'
-mesh8.position.set(-61.620, 1.300, -87.900)
-mesh8.scale.set(20.000, 3.000, 17.240)
-mesh8.material.wireframe = true
-scene.add(mesh8)
+
+const artifact8Geometry = new THREE.BoxGeometry(1, 1, 1)
+const artifact8Material = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
+const artifact8 = new THREE.Mesh(artifact8Geometry, artifact8Material)
+artifact8.name = 'artifact8'
+artifact8.position.set(-89, 8, artifact7.position.z - distanceBetween)
+artifact8.material.wireframe = true
+artifact8.scale.set(1, 18, 18)
+scene.add(artifact8)
+const artifact8dat = gui.addFolder('Artifact 8')
+artifact8dat.close()
+artifact8dat.add(artifact8.position, 'x', "slider").name("Position X");
+artifact8dat.add(artifact8.position, 'y').name("Position Y");
+artifact8dat.add(artifact8.position, 'z').name("Position Z");
+artifact8dat.add(artifact8.scale, 'x').name("Scale X");
+artifact8dat.add(artifact8.scale, 'y').name("Scale Y");
+artifact8dat.add(artifact8.scale, 'z').name("Scale Z");
+artifact8dat.close()
 
 
-const geometry9 = new THREE.BoxGeometry(0.3, 1, 0.3)
-const material9 = new THREE.MeshStandardMaterial({ color: 0xffbb3d })
-const mesh9 = new THREE.Mesh(geometry9, material9)
-mesh9.name = 'lookAt4'
-mesh9.position.set(0.260, 1.610, -86.610)
-mesh9.scale.set(20.000, 3.000, 17.240)
-mesh9.material.wireframe = true
-scene.add(mesh9)
-
+function getMouse(event) { event.preventDefault(); var rect = container.getBoundingClientRect(); mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1; mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1; }
 
 // box sizes
 const sizes = {
@@ -131,8 +256,9 @@ const light = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(light);
 
 // Camera
-const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 1, 1000);
+const camera = new THREE.PerspectiveCamera(60, sizes.width / sizes.height, 1, 1000);
 camera.position.set(-0.603, 1.955, 29.095)
+camera.rotation.y = Math.PI / 2
 scene.add(camera)
 //Create a closed wavey loop
 const curve = new THREE.CatmullRomCurve3([
@@ -142,8 +268,10 @@ const curve = new THREE.CatmullRomCurve3([
     new THREE.Vector3(mesh4.position.x, 0, mesh4.position.z),
     new THREE.Vector3(mesh5.position.x, 0, mesh5.position.z),
 ]);
-curve.closed = true;
+curve.closed = true
+
 const points = curve.getPoints(50);
+console.log(curve.points)
 const geometry = new THREE.BufferGeometry().setFromPoints(points);
 const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
 // Create the final object to add to the scene
@@ -156,7 +284,7 @@ const renderer = new THREE.WebGLRenderer({
     antialias: true,
     castShadow: true
 })
-const controls = new OrbitControls(camera, renderer.domElement);
+
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
@@ -169,24 +297,44 @@ Array.from(classname).forEach((el) => {
 
 function changeObject(e) {
     playing = true
-    selectSpot = e.currentTarget.getAttribute("data-goTo") - 1
+    direction = e.currentTarget.getAttribute("data-goTo") < selectSpot ? 'backward' : 'forward'
+    selectSpot = e.currentTarget.getAttribute("data-goTo")
     lookAtMesh = e.currentTarget.getAttribute("data-lookAt")
 }
 
 // LOOK AT
 function lookAtObject(obj) {
+    var item = scene.getObjectByName(lookAtMesh)
     var startRotation = new THREE.Euler().copy(camera.rotation);
-    camera.lookAt(obj.position);
+    camera.lookAt(item.position);
     var endRotation = new THREE.Euler().copy(camera.rotation);
     camera.rotation.copy(startRotation);
     // Tween
     gsap.to(camera.rotation, { x: endRotation.x, y: endRotation.y, z: endRotation.z, duration: 1 }).then(() => {
-        playing = false
-        lookAtMesh = ''
-        
+        //  playing = false
     })
 }
 
+
+
+function moveAlong() {
+    // BASIC
+    console.log(direction)
+    direction == 'forward' ? t += 0.003 : t -= 0.003
+
+    pos = curve.getPointAt(t);
+    camera.position.set(pos.x, pos.y, pos.z);
+    
+
+    // t += 0.003;
+    // curve.getPointAt(t % 1, p1);
+    // curve.getPointAt((t + 0.001) % 1, p2);
+    // lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
+    // camera.position.copy(p1);
+    // camera.lookAt(lookAt);
+    // camPos = lookAt
+}
+var direction = 'forward'
 var t = 0
 var p1 = new THREE.Vector3();
 var p2 = new THREE.Vector3();
@@ -199,28 +347,19 @@ var playing = false
 var camPos = new THREE.Vector3(0, 0, 0); // Holds current camera position
 var pos = curve.getPointAt((t + 0.001) % 1, p2);
 var pause = false
+//const controls = new OrbitControls(camera, renderer.domElement);
+
 
 //camera.lookAt
-
 const animate = () => {
-    if (playing) {
-        if (camera.position.distanceTo(curve.points[selectSpot]) < 2) {
-            if(scene.getObjectByName(lookAtMesh)){
-                lookAtObject(scene.getObjectByName(lookAtMesh))
-            
-            }
+    console.log(camera.position.distanceTo(curve.points[2]))
 
-           
-        } else {
-            t += 0.003;
-            curve.getPointAt(t % 1, p1);
-            curve.getPointAt((t + 0.001) % 1, p2);
-            lookAt.copy(p2).sub(p1).applyAxisAngle(axis, -Math.PI * 0.5).add(p1); // look at the point 90 deg from the path
-            camera.position.copy(p1);
-            camera.lookAt(lookAt);
-            camPos = lookAt
-        }
+    if (camera.position.distanceTo(curve.points[selectSpot]) > 2) {
+        moveAlong()
+        lookAtObject()
     }
+
+
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
     return renderer.render(scene, camera);
