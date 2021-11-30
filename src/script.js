@@ -1,8 +1,7 @@
 import './style.css'
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
+import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
 import gsap from 'gsap'
 import * as dat from 'lil-gui'
 import { makeTextSprite } from './makeTextSprite.js'
@@ -20,53 +19,51 @@ const geometry1 = new THREE.BoxGeometry(1, 1, 1)
 const material1 = new THREE.MeshStandardMaterial({ color: 0x3d87ff })
 let artifacts = []
 var offset = 0
-var total = 10
-var i = total
-for (var i = total - 1; i >= 1; i--) {
-    if (i >= 1) {
-        offset += 35
-    }
+var x = 10
+for (var i = 1; i <= 20;) {
+    offset += 32
     cube[i] = new THREE.Mesh(geometry1, material1);
     cube[i].name = 'Artifact' + i
     cube[i].userData.id = i
-    cube[i].scale.set(1, 18, 18)
-    cube[i].position.set(29, 8, 210 - offset)
+    var spritey = makeTextSprite(cube[i].name, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 44, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
 
-    curvePositions.push({ x: -1.380, y: 8, z: 210 - offset })
+    cube[i].scale.set(1, 18, 18)
+    if (i <= 10) {
+        cube[i].position.set(29, 8, -140 + offset)
+        curvePositions.push({ x: -10, y: 8, z: -140 + offset })
+        spritey.position.set(cube[i].position.x - 15, cube[i].position.y, cube[i].position.z)
+    }
+    else if (i <= 20) {
+        cube[i].position.set(-89.560, 8, cube[10].position.z - offset)
+        cube[i].rotation.y = Math.PI * 2
+        curvePositions.push({ x: -50, y: 8, z: cube[10].position.z - offset })
+        spritey.position.set(cube[i].position.x + 10, cube[i].position.y, cube[i].position.z)
+    }
     artifacts.push(cube[i])
     scene.add(cube[i]);
-    var spritey = makeTextSprite(cube[i].name, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 44, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-    spritey.position.set(cube[i].position.x - 10, cube[i].position.y, cube[i].position.z)
     scene.add(spritey);
-}
-// LEFT WALL ARTIFACTS
-var cubeLeft = [];
-offset = 0
-var plus = 0
-for (let x = total; x < total * 2 - 1; x++) {
-    if (x >= total) {
-        offset += 35
+
+    i++
+    if (i == 11) {
+        offset = -40
     }
-    cubeLeft[x] = new THREE.Mesh(geometry1, material1);
-    cubeLeft[x].name = 'Artifact' + x
-    cubeLeft[x].scale.set(1, 18, 18)
-    cubeLeft[x].position.set(-89.770, 8, -130 + offset)
-    cubeLeft[x].userData.id = x
-    artifacts.push(cubeLeft[x])
-    curvePositions.push({ x: -59.520, y: 8, z: -130 + offset })
-    scene.add(cubeLeft[x]);
-    var spritey = makeTextSprite(cubeLeft[x].name, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 44, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-    spritey.position.set(cubeLeft[x].position.x + 10, cubeLeft[x].position.y, cubeLeft[x].position.z)
-    scene.add(spritey);
 }
+
+
 var cameraTest = new THREE.Mesh(geometry1, material1);
+cameraTest.scale.z = 4
+cameraTest.scale.y = 4
 cameraTest.name = 'testCam'
-scene.add(cameraTest)
+//scene.add(cameraTest)
+
+
+// CAMERA PATH
 const curve = new THREE.CatmullRomCurve3();
 curvePositions.forEach(position => {
     curve.points.push(new THREE.Vector3(position.x, position.y, position.z - 10))
 });
-curve.closed = false
+curve.closed = true
+curve.curveType = "centripetal";
 const points = curve.getPoints(16);
 // console.log(curve.points)
 const curveGeometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -74,6 +71,20 @@ const curveMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
 // // Create the final object to add to the scene
 const curveObject = new THREE.Line(curveGeometry, curveMaterial);
 scene.add(curveObject)
+
+
+curvePositions.forEach(curve => {
+    var curveHelper = new THREE.Mesh(geometry1, material1);
+    curveHelper.position.x = curve.x
+    curveHelper.position.y = curve.y
+    curveHelper.position.z = curve.z
+    //curveHelper.material.color.setHex(0,0,0)
+    scene.add(curveHelper)
+})
+
+
+
+
 // box sizes
 const sizes = {
     width: window.innerWidth,
@@ -126,74 +137,68 @@ renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
 
 
-
 function onDocumentMouseDown(event) {
-    event.preventDefault();
-    var mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    var raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(mouse, camera);
-    var intersects = raycaster.intersectObjects(artifacts);
+    if (!playing) {
+        event.preventDefault();
+        var mouse = new THREE.Vector2();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+        var raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        var intersects = raycaster.intersectObjects(artifacts);
 
-    var matched_marker = null;
-    if (intersects.length > 0) {
-        //$('html,body').css('cursor','pointer');//mouse cursor change
-        for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
+        var matched_marker = null;
+        if (intersects.length > 0) {
+            for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
+                const chosen = intersects[0].object.userData.id - 1
+                direction = chosen < selectSpot ? 'backward' : 'forward'
+                selectSpot = chosen
+                console.log('choosing: ' + chosen)
+                console.log(direction)
+                playing = true
+            }
 
-
-
-            playing = true
-
-            const chosen = intersects[0].object.userData.id
-
-            direction = chosen < selectSpot ? 'backward' : 'forward'
-            selectSpot = chosen
-            console.log('choosing: ' + chosen)
-            console.log(direction)
         }
-    }
-    else {
-        //$('html,body').css('cursor','cursor');
     }
 }
 
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 
+// document.addEventListener('mousemove', function (e) {
+//     var mouse3D = new THREE.Vector3((event.clientX) * 100 - 1, 0.5);
+//     camera.lookAt(mouse3D);
+// });
+
 
 // LOOK AT
-function lookAtObject(obj) {
-    if (!controls.enabled) {
-        var item = scene.getObjectByName('Artifact' + selectSpot)
-        var startRotation = new THREE.Euler().copy(camera.rotation);
-        camera.lookAt(item.position);
-        var endRotation = new THREE.Euler().copy(camera.rotation);
-        camera.rotation.copy(startRotation);
-        console.log('looking at' + selectSpot)
-        // Tweex
-        gsap.to(camera.rotation, {
-            //x: endRotation.x,
-            y: endRotation.y,
-            // z: endRotation.z,
-            duration: 1
-        }).then(() => {
-            playing = false
-        })
-    }
+function lookAtObject(cam, obj) {
+    // if (!controls.enabled) {
+    var item = scene.getObjectByName('Artifact' + selectSpot)
+    var startRotation = new THREE.Euler().copy(cam.rotation);
+    cam.lookAt(item.position);
+    var endRotation = new THREE.Euler().copy(cam.rotation);
+    cam.rotation.copy(startRotation);
+    console.log(obj)
+    // Tweex
+    gsap.to(cam.rotation, {
+        //x: endRotation.x,
+        y: endRotation.y,
+        // z: endRotation.z,
+        duration: 0.2
+    }).then(() => {
+        // playing = false
+    })
+    // }
 }
-var vt = t * 0.01
-function userLookAt() {
-    console.log('looking at')
-}
+
 var t = 0
 function moveAlong() {
     // BASIC
-    direction == 'forward' ? t += 0.003 : t -= 0.003
-    if (curve.getPointAt(t) != undefined && t != undefined) {
-        pos = curve.getPointAt(t);
-        cameraTest.position.copy(pos);
-    }
-   
+    direction == 'forward' ? t += 0.005 : t -= 0.005
+    var pos = curve.getPointAt(t)
+    cameraTest.position.set(pos.x, pos.y, pos.z)
+
+
 }
 var p1 = new THREE.Vector3();
 var p2 = new THREE.Vector3();
@@ -203,32 +208,71 @@ var pos = 0
 var playing = false
 var camPos = new THREE.Vector3(0, 0, 0);
 var diff = {}
-// Holds current camera position
-var pause = false
-const controls = new OrbitControls(camera, renderer.domElement);
-// controls.enableZoom = false
-// controls.enablePan = false
-// controls.enabled = false
-// console.log(controls)
-//camera.lookAt
+var cameraTurned = false
+var cameraLastRotation = 0
+var prevTime = 0
+var rotation = 0
+var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
+
+
+const controls = new FirstPersonControls(camera, document.body);
+controls.lookSpeed = 0.03;
+controls.movementSpeed = 20;
+controls.noFly = true;
+controls.lookVertical = false;
+controls.constrainVertical = true;
+controls.verticalMin = 1.0;
+controls.verticalMax = 2.0;
+
+console.log(controls)
+
+
+
+var clock = new THREE.Clock();
 const animate = () => {
-    //lookAtObject()
-    if (camera.position.distanceTo(curve.points[selectSpot]) > 5) {
-        //  controls.enabled = false
-    }
-
-    diff.x = Math.abs(cameraTest.position.x - curve.points[selectSpot].x);
-    diff.y = Math.abs(cameraTest.position.y - curve.points[selectSpot].y);
-    diff.z = Math.abs(cameraTest.position.z - curve.points[selectSpot].z);
-
-    if (diff.x < 1 && diff.y < 1 && diff.z < 1) {
-
-    } else {
-        moveAlong()
-        lookAtObject()
-    }
+    var delta = clock.getDelta();
     requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+    if (playing) {
+        controls.enabled = false
+    } else {
+        controls.enabled = true
+    }
+    //lookAtObject(cameraTest, artifacts[selectSpot])
+
+
+    if (camera.position.distanceTo(curvePositions[selectSpot]) > 1.5 && playing) {
+
+        direction == 'forward' ? t += 0.005 : t -= 0.005
+        var pos = curve.getPoint(t);
+        camera.position.set(pos.x, pos.y, pos.z);
+        //     controls.getObject().position.copy(camera.position);
+        controls.target = artifacts[selectSpot].position
+        lookAtObject(camera, artifacts[selectSpot])
+
+
+        // if (selectSpot < 9 && direction == 'forward') {
+        //     lookAtObject(cameraTest, curvePositions[9])
+        // }
+        // if (selectSpot < 9 && selectSpot > 9 && direction == 'forward') {
+        //     lookAtObject(cameraTest, curvePositions[10])
+        // }
+        // if (selectSpot > 9 && direction == 'forward') {
+        //     lookAtObject(cameraTest, curvePositions[19])
+        // }
+    } else {
+        controls.target = artifacts[selectSpot].position
+        //  playing = false
+        lookAtObject(camera, artifacts[selectSpot])
+
+    }
+    camera.lookAt(controls.target)
+
+
+    controls.update(delta);
+
+
     return renderer.render(scene, camera);
-}
+};
+
+
 animate()
