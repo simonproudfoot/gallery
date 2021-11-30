@@ -223,7 +223,7 @@ controls.lookVertical = false;
 controls.constrainVertical = true;
 controls.verticalMin = 1.0;
 controls.verticalMax = 2.0;
-
+controls.object.position.copy(curvePositions[0])
 console.log(controls)
 
 
