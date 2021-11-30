@@ -2,6 +2,13 @@ import './style.css'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
+
+import {
+    MeshBasicMaterial
+  } from 'three/build/three.module.js';
+
+
+
 import gsap from 'gsap'
 import * as dat from 'lil-gui'
 import { makeTextSprite } from './makeTextSprite.js'
@@ -26,7 +33,7 @@ for (var i = 1; i <= 20;) {
     cube[i].name = 'Artifact' + i
     cube[i].userData.id = i
     var spritey = makeTextSprite(cube[i].name, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 44, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-
+    spritey.name = 'sprite'+i
     cube[i].scale.set(1, 18, 18)
     if (i <= 10) {
         cube[i].position.set(29, 8, -140 + offset)
@@ -39,9 +46,11 @@ for (var i = 1; i <= 20;) {
         curvePositions.push({ x: -50, y: 8, z: cube[10].position.z - offset })
         spritey.position.set(cube[i].position.x + 10, cube[i].position.y, cube[i].position.z)
     }
+  
     artifacts.push(cube[i])
     scene.add(cube[i]);
     scene.add(spritey);
+    
 
     i++
     if (i == 11) {
@@ -55,6 +64,10 @@ cameraTest.scale.z = 4
 cameraTest.scale.y = 4
 cameraTest.name = 'testCam'
 //scene.add(cameraTest)
+var fogColor = new THREE.Color(0xffffff);
+ 
+scene.background = fogColor;
+scene.fog = new THREE.Fog(fogColor, 0.0025, 700);
 
 
 // CAMERA PATH
@@ -117,7 +130,7 @@ loader.load(
     }
 );
 // lights
-var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.5);
+var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.2);
 scene.add(hemiLight);
 const light = new THREE.AmbientLight(0x404040); // soft white light
 scene.add(light);
@@ -155,6 +168,7 @@ function onDocumentMouseDown(event) {
                 selectSpot = chosen
                 console.log('choosing: ' + chosen)
                 console.log(direction)
+                started = true
                 playing = true
             }
 
@@ -172,23 +186,19 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 
 // LOOK AT
 function lookAtObject(cam, obj) {
-    // if (!controls.enabled) {
     var item = scene.getObjectByName('Artifact' + selectSpot)
     var startRotation = new THREE.Euler().copy(cam.rotation);
     cam.lookAt(item.position);
     var endRotation = new THREE.Euler().copy(cam.rotation);
     cam.rotation.copy(startRotation);
-    console.log(obj)
-    // Tweex
+
     gsap.to(cam.rotation, {
-        //x: endRotation.x,
         y: endRotation.y,
-        // z: endRotation.z,
         duration: 0.2
-    }).then(() => {
-        // playing = false
     })
-    // }
+
+
+
 }
 
 var t = 0
@@ -200,19 +210,11 @@ function moveAlong() {
 
 
 }
-var p1 = new THREE.Vector3();
-var p2 = new THREE.Vector3();
-var lookAt = new THREE.Vector3();
-var axis = new THREE.Vector3(0, 0, 0);
-var pos = 0
+
 var playing = false
-var camPos = new THREE.Vector3(0, 0, 0);
-var diff = {}
-var cameraTurned = false
-var cameraLastRotation = 0
-var prevTime = 0
-var rotation = 0
-var raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
+var started = false
+
+
 
 
 const controls = new FirstPersonControls(camera, document.body);
@@ -223,49 +225,54 @@ controls.lookVertical = false;
 controls.constrainVertical = true;
 controls.verticalMin = 1.0;
 controls.verticalMax = 2.0;
+
 controls.object.position.copy(curvePositions[0])
+controls.object.focus =0
+
+
+controls.lookAt = new THREE.Vector3(0, 0, 0);
 console.log(controls)
+
+
+
 
 
 
 var clock = new THREE.Clock();
 const animate = () => {
     var delta = clock.getDelta();
+    if(!started){
+        lookAtObject(camera, curvePositions[8])
+    }
     requestAnimationFrame(animate);
     if (playing) {
         controls.enabled = false
-    } else {
+        
+    } 
+    else if(!playing && !started) {
         controls.enabled = true
+       
     }
-    //lookAtObject(cameraTest, artifacts[selectSpot])
-
 
     if (camera.position.distanceTo(curvePositions[selectSpot]) > 1.5 && playing) {
-
         direction == 'forward' ? t += 0.005 : t -= 0.005
         var pos = curve.getPoint(t);
         camera.position.set(pos.x, pos.y, pos.z);
-        //     controls.getObject().position.copy(camera.position);
         controls.target = artifacts[selectSpot].position
         lookAtObject(camera, artifacts[selectSpot])
 
-
-        // if (selectSpot < 9 && direction == 'forward') {
-        //     lookAtObject(cameraTest, curvePositions[9])
-        // }
-        // if (selectSpot < 9 && selectSpot > 9 && direction == 'forward') {
-        //     lookAtObject(cameraTest, curvePositions[10])
-        // }
-        // if (selectSpot > 9 && direction == 'forward') {
-        //     lookAtObject(cameraTest, curvePositions[19])
-        // }
+        camera.updateProjectionMatrix();
     } else {
         controls.target = artifacts[selectSpot].position
-    
         lookAtObject(camera, artifacts[selectSpot])
+       
+        if (started && camera.zoom < 1.2) {
 
-     
-
+        //    scene.getObjectById('D431AEA0-E645-4C9D-8E4E-1B7A6FBC8FDF').position.y  += 0.004;
+          //  console.log(scene.getObjectByName('sprite'+selectSpot))
+            camera.zoom += 0.004;
+            camera.updateProjectionMatrix();
+        }
     }
     camera.lookAt(controls.target)
 
