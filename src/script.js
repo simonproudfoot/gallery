@@ -261,8 +261,10 @@ const animate = () => {
         // }
     } else {
         controls.target = artifacts[selectSpot].position
-        //  playing = false
+    
         lookAtObject(camera, artifacts[selectSpot])
+
+     
 
     }
     camera.lookAt(controls.target)
