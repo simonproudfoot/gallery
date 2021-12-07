@@ -11,10 +11,13 @@ html, body{
 
 .controls{
     position: fixed;
-    bottom: 0;
+    bottom: 58px;
     left: 0;
+    right: 0;
     z-index: 1;
     height: 20px;
     width: 400px;
-
+    text-align: center;
+    margin: auto;
 }
+
