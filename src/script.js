@@ -1,13 +1,14 @@
 import './style.css'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { FirstPersonControls } from 'three/examples/jsm/controls/FirstPersonControls.js';
 import gsap from 'gsap'
-
+import CameraControls from 'camera-controls';
+CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
-const showCurve = false
+
 let direction = 'forward'
 let selectSpot = null
+let observing = false
 //const gui = new dat.GUI()
 let mouseDown = false;
 // Canvas
@@ -33,13 +34,13 @@ for (var i = 1; i <= 20;) {
     cube[i].scale.set(1, 18, 18)
     if (i <= 10) {
         cube[i].position.set(29, 8, -140 + offset)
-        curvePositions.push({ x: -10, y: 8, z: -140 + offset })
+        // curvePositions.push({ x: -10, y: 8, z: -140 + offset })
         spritey.position.set(cube[i].position.x - 15, cube[i].position.y, cube[i].position.z)
     }
     else if (i <= 21) {
         cube[i].position.set(-89.560, 8, cube[10].position.z - offset)
         cube[i].rotation.y = Math.PI * 2
-        curvePositions.push({ x: -50, y: 8, z: cube[10].position.z - offset })
+        // curvePositions.push({ x: -50, y: 8, z: cube[10].position.z - offset })
         spritey.position.set(cube[i].position.x + 10, cube[i].position.y, cube[i].position.z)
     }
     artifacts.push(cube[i])
@@ -50,59 +51,12 @@ for (var i = 1; i <= 20;) {
         offset = -40
     }
 }
-var cameraTest = new THREE.Mesh(geometry1, material1);
-cameraTest.scale.z = 4
-cameraTest.scale.y = 10
-cameraTest.name = 'testCam'
-//scene.add(cameraTest)
+
 var fogColor = new THREE.Color(0xffffff);
 scene.background = fogColor;
 scene.fog = new THREE.Fog(fogColor, 0.0025, 700);
-// CAMERA PATH
-const curve = new THREE.CatmullRomCurve3();
-// ENTER THE LOBBY
-curvePositions.forEach(position => {
-    curve.points.push(new THREE.Vector3(position.x, position.y, position.z - 10))
-});
 
 
-curve.closed = true
-//curve.curveType = "centripetal";
-const curveGeometry = new THREE.BufferGeometry().setFromPoints(curve.points);
-const curveMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-console.log(curveMaterial)
-// Create the final object to add to the scene
-const curveObject = new THREE.Line(curveGeometry, curveMaterial);
-scene.add(curveObject)
-curvePositions.forEach(curve => {
-    var curveHelper = new THREE.Mesh(geometry1, materialRed);
-    if(!showCurve){
-        curveHelper.visible = false
-    }
-    curveHelper.position.x = curve.x
-    curveHelper.position.y = curve.y
-    curveHelper.position.z = curve.z
-    scene.add(curveHelper)
-})
-
-
-if(!showCurve){
-    curve.visible = false
-    curveMaterial.visible = false
-}
-
-// ENTER THE LOBBY
-const curveLobby = new THREE.CatmullRomCurve3();
-// ENTER THE LOBBY
-curveLobby.points.push(new THREE.Vector3(0, 9, -300))
-curveLobby.points.push(new THREE.Vector3(-0.940, 9, -130))
-curveLobby.closed = false
-curveLobby.curveLobbyType = "centripetal";
-const lobbyPoints = curveLobby.getPoints(16);
-const curveLobbyGeometry = new THREE.BufferGeometry().setFromPoints(lobbyPoints);
-const curveLobbyMaterial = new THREE.LineBasicMaterial({ color: 0xeee });
-const curveLobbyObject = new THREE.Line(curveLobbyGeometry, curveLobbyMaterial);
-scene.add(curveLobbyObject)
 // box sizes
 const sizes = {
     width: window.innerWidth,
@@ -152,14 +106,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
-document.addEventListener('mouseup', () => {
-    if (!mouseDown) {
-        mouseDown = false
-    }
-})
 function onDocumentMouseDown(event) {
-    mouseDown = true
-    //controls.enabled = false
     event.preventDefault();
     var mouse = new THREE.Vector2();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -167,15 +114,13 @@ function onDocumentMouseDown(event) {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(artifacts);
-    var matched_marker = null;
     if (intersects.length > 0) {
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
             const chosen = intersects[0].object.userData.id - 1
             direction = chosen < selectSpot ? 'backward' : 'forward'
             selectSpot = chosen
             console.log('choosing: ' + chosen)
-            console.log(direction)
-            //intro = true
+
             playing = true
         }
     }
@@ -183,48 +128,31 @@ function onDocumentMouseDown(event) {
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.getElementById("start").addEventListener("click", beginTour);
 function beginTour(params) {
-    document.getElementById("start").style.display = 'd'
+    document.getElementById("start").style.display = 'none'
     started = true
     intro = true
 }
-// LOOK AT
-function lookAtObject(cam, obj) {
-    controls.enabled = false
-    var item = scene.getObjectByName('Artifact' + selectSpot)
-    var startRotation = new THREE.Euler().copy(cam.rotation);
-    cam.lookAt(item.position);
-    var endRotation = new THREE.Euler().copy(cam.rotation);
-    cam.rotation.copy(startRotation);
-    gsap.to(cam.rotation, {
-        y: endRotation.y,
-        duration: 2
-    }).then(() => {
-        // controls.enabled = true
-        //alert('read')
-    })
-}
 
 
+var camSpeed = -10
 
-camera.position.copy(curveLobby.points[0])
-const controls = new FirstPersonControls(camera, document.body);
-controls.lookSpeed = 0.06;
-controls.movementSpeed = 0.001;
-controls.noFly = true;
-controls.lookVertical = false;
-controls.constrainVertical = true;
-controls.verticalMin = 1.0;
-controls.verticalMax = 2.0;
-controls.object.position.copy(curveLobby.getPoint(0))
-controls.enabled = false
-controls.autoForward = true
-controls.moveForward = false;
-controls.moveBackward = false;
-controls.moveLeft = false;
-controls.moveRight = false;
-controls.mouseDragOn = true
 
-console.log(controls)
+const cameraControls = new CameraControls(camera, renderer.domElement);
+cameraControls.minDistance = cameraControls.maxDistance = 1;
+// cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
+// cameraControls.polarRotateSpeed = camSpeed; // negative value to invert rotation direction
+// cameraControls.truckSpeed = camSpeed;
+// cameraControls.dollySpeed = camSpeed
+// cameraControls.dampingFactor = 0.08
+cameraControls.minZoom = 1;
+cameraControls.maxZoom = 1;
+cameraControls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
+cameraControls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
+cameraControls.enabled = false
+cameraControls.saveState();
+
+
+console.log(cameraControls)
 var delta;
 var playing = false
 var intro = false
@@ -232,57 +160,89 @@ var started = false
 var clock = new THREE.Clock();
 var t = 0
 var ready;
+var last = {}
+var lastTarget;
 // inital view
 camera.lookAt(new THREE.Vector3(0, 0, 0))
-controls.lookAt(new THREE.Vector3(0, 0, 0))
-console.log('curve points:', curve.points.length)
-console.log('artifacts count:', artifacts.length)
+const cameraStand = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+);
+scene.add(cameraStand);
+cameraStand.geometry.computeBoundingBox();
+cameraStand.visible=false
+const meshBBSize = cameraStand.geometry.boundingBox.getSize(new THREE.Vector3());
+const meshBBWidth = meshBBSize.x;
+const meshBBHeight = meshBBSize.y;
+const meshBBDepth = meshBBSize.z;
+
+function customFitTo() {
+
+    const distanceToFit = cameraControls.getDistanceToFitBox(meshBBWidth, meshBBHeight, meshBBDepth);
+    cameraControls.moveTo(
+        cameraStand.position.x,
+        cameraStand.position.y,
+        cameraStand.position.z + distanceToFit,
+        true
+    );
+
+}
+
+cameraControls.setPosition(0, 9, -300)
+async function startTour() {
+    await cameraControls.setPosition(0, 0, 0, true);
+    intro = false
+    ready = true
+    cameraControls.enabled = true
+    return true
+}
+
+async function lookAtArtifact(params) {
+    var nextPos = {}
+    nextPos.x = artifacts[selectSpot].position.x
+    nextPos.y = artifacts[selectSpot].position.y
+    nextPos.z = artifacts[selectSpot].position.z
+    cameraControls.setTarget(nextPos.x, nextPos.y, nextPos.z, true)
+    cameraControls.saveState()
+    if (selectSpot <= 9) {
+        await cameraControls.setPosition(nextPos.x - 20, nextPos.y, nextPos.z, true)
+    } else {
+        await cameraControls.setPosition(nextPos.x + 20, nextPos.y, nextPos.z, true)
+    }
+
+    // test 
+    setTimeout(() => {
+        selectSpot = null
+        alert('get the last positon then turn to the room')
+    }, 3000);
+   
+   
+
+}
+
 
 const animate = () => {
-    var delta = clock.getDelta();
     // INTRO - WALK INTO ROOM
     if (intro && started) {
-        t += 0.007
-        if (t < 1) {
-            var pos = curveLobby.getPoint(t);
-            camera.position.set(pos.x, pos.y, pos.z);
-            controls.lookAt = new THREE.Vector3(camera.matrix[8], camera.matrix[9], camera.matrix[10])
-        }
-        else {
-            intro = false
-            ready = true
-            controls.enabled = true
-        }
+        startTour()
+    } else if (selectSpot) {
+        lookAtArtifact()
+    } else if (intro && started && !selectSpot) {
+        alert('move back to room')
     }
 
 
-    // GO TO THE OBJECT
-    if (selectSpot && camera.position.distanceTo(curvePositions[selectSpot]) > 5 && playing && !intro) {
-        //controls.enabled = false
-        direction == 'forward' ? t += 0.001 : t -= 0.001
-        var pos = curve.getPoint(t);
-        camera.position.set(pos.x, pos.y, pos.z);
-        //lookAtObject(camera, artifacts[selectSpot-3])
-        // cam
-        //  controls.target = artifacts[selectSpot].position
-        // lookAtObject(camera, artifacts[selectSpot])
-        // camera.updateProjectionMatrix();
-    } else if (playing && !intro && camera.zoom < 1.2) {
-        //   controls.enabled = false
-        // lookAtObject(camera, artifacts[selectSpot-2])
-        //  camera.zoom += 0.004;
-    }
-
-
-
-
-
-
-
-
+    const delta = clock.getDelta();
+    const elapsed = clock.getElapsedTime();
+    const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
-    camera.updateProjectionMatrix();
-    controls.update(delta)
+    customFitTo()
     return renderer.render(scene, camera);
+
 };
 animate()
+
+
+
+
+
