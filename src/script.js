@@ -1,10 +1,11 @@
 import './style.css'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import gsap from 'gsap'
+//import gsap from 'gsap'
 import CameraControls from 'camera-controls';
 CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
+const backButton = document.getElementById('goback')
 
 let direction = 'forward'
 let selectSpot = null
@@ -136,27 +137,17 @@ function beginTour(params) {
     started = true
     intro = true
 }
-
-
-var camSpeed = -10
-
-
+var camSpeed = -1
 const cameraControls = new CameraControls(camera, renderer.domElement);
 cameraControls.minDistance = cameraControls.maxDistance = 1;
-// cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
-// cameraControls.polarRotateSpeed = camSpeed; // negative value to invert rotation direction
-// cameraControls.truckSpeed = camSpeed;
-// cameraControls.dollySpeed = camSpeed
-// cameraControls.dampingFactor = 0.08
+cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
+cameraControls.polarRotateSpeed = camSpeed; // negative value to invert rotation direction
 cameraControls.minZoom = 1;
 cameraControls.maxZoom = 1;
 cameraControls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
 cameraControls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 cameraControls.enabled = false
 cameraControls.saveState();
-
-
-console.log(cameraControls)
 var delta;
 var playing = false
 var intro = false
@@ -200,9 +191,9 @@ async function startTour() {
     cameraControls.enabled = true
     return true
 }
-
+var nextPos = {}
 async function lookAtArtifact(params) {
-    var nextPos = {}
+    backButton.style.display = 'block'
     nextPos.x = artifacts[selectSpot].position.x
     nextPos.y = artifacts[selectSpot].position.y
     nextPos.z = artifacts[selectSpot].position.z
@@ -210,32 +201,25 @@ async function lookAtArtifact(params) {
    
 
     if (selectSpot <= 9) {
-        cameraStand.position.set(nextPos.x - 20, nextPos.y, nextPos.z)
-        await cameraControls.setPosition(nextPos.x - 20, nextPos.y, nextPos.z, true)
+        cameraStand.position.set(nextPos.x - 30, nextPos.y, nextPos.z)
+        await cameraControls.setPosition(nextPos.x - 30, nextPos.y, nextPos.z, true)
         
     } else {
-        cameraStand.position.set(nextPos.x + 20, nextPos.y, nextPos.z)
-        await cameraControls.setPosition(nextPos.x + 20, nextPos.y, nextPos.z, true)
+        cameraStand.position.set(nextPos.x + 30, nextPos.y, nextPos.z)
+        await cameraControls.setPosition(nextPos.x + 30, nextPos.y, nextPos.z, true)
     }
   
-
     cameraControls.saveState()
-
-    //console.log('camera',camera.position)
-   // camera.position = cameraControls.getPosition()
-    //console.log('cameraControls',cameraControls.sgetPosition())
-
-    // test 
    
 }
 
-function turnAround() {
-
-  
+async function turnAround() {
    // cameraControls.setPosition(0, 0, 0, true)
-    //cameraControls.setTarget(0, 0, -300, true)
+   // cameraControls.setTarget(0, 0, -300, true)
+   
+    await cameraControls.setLookAt( cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true )
     selectSpot = null
-    
+    backButton.style.display = 'none'
 }
 
 const animate = () => {
