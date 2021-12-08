@@ -125,6 +125,10 @@ function onDocumentMouseDown(event) {
         }
     }
 }
+
+document.getElementById("goback").addEventListener("click", turnAround);
+
+
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.getElementById("start").addEventListener("click", beginTour);
 function beginTour(params) {
@@ -203,23 +207,36 @@ async function lookAtArtifact(params) {
     nextPos.y = artifacts[selectSpot].position.y
     nextPos.z = artifacts[selectSpot].position.z
     cameraControls.setTarget(nextPos.x, nextPos.y, nextPos.z, true)
-    cameraControls.saveState()
+   
+
     if (selectSpot <= 9) {
+        cameraStand.position.set(nextPos.x - 20, nextPos.y, nextPos.z)
         await cameraControls.setPosition(nextPos.x - 20, nextPos.y, nextPos.z, true)
+        
     } else {
+        cameraStand.position.set(nextPos.x + 20, nextPos.y, nextPos.z)
         await cameraControls.setPosition(nextPos.x + 20, nextPos.y, nextPos.z, true)
     }
+  
+
+    cameraControls.saveState()
+
+    //console.log('camera',camera.position)
+   // camera.position = cameraControls.getPosition()
+    //console.log('cameraControls',cameraControls.sgetPosition())
 
     // test 
-    setTimeout(() => {
-        selectSpot = null
-        alert('get the last positon then turn to the room')
-    }, 3000);
    
-   
-
 }
 
+function turnAround() {
+
+  
+   // cameraControls.setPosition(0, 0, 0, true)
+    //cameraControls.setTarget(0, 0, -300, true)
+    selectSpot = null
+    
+}
 
 const animate = () => {
     // INTRO - WALK INTO ROOM
@@ -227,9 +244,10 @@ const animate = () => {
         startTour()
     } else if (selectSpot) {
         lookAtArtifact()
-    } else if (intro && started && !selectSpot) {
-        alert('move back to room')
-    }
+    } 
+    // else if (intro && started && !selectSpot) {
+    //     alert('move back to room')
+    // }
 
 
     const delta = clock.getDelta();
