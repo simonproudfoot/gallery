@@ -4,9 +4,20 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import CameraControls from 'camera-controls';
 CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
+const axios = require('axios').default;
+const loader = new GLTFLoader();
+import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
+import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
+
+var testing = false;
+const afcUrl = 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
+let database;
+
 const backButton = document.getElementById('goback')
 const pos = document.getElementById('pos')
-var testing = false;
+const loading = document.getElementById('loading')
+const start = document.getElementById('start')
+
 var delta;
 var playing = false
 var intro = false
@@ -26,6 +37,8 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
+
+
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 // Scene
@@ -36,41 +49,33 @@ var cube = [];
 const wallMountedGeometry = new THREE.BoxGeometry(1, 20, 20)
 const pedestalGeometry = new THREE.CylinderGeometry(5, 5, 8, 10);
 const material1 = new THREE.MeshStandardMaterial({ color: 0xcfc4a0 })
-const materialRed = new THREE.MeshStandardMaterial({ color: 0xeb4034, wireframe: true })
 const positions = [{ "x": 29, "y": 8, "z": -118 }, { "x": 29, "y": 8, "z": -86 }, { "x": 29, "y": 8, "z": -54 }, { "x": 29, "y": 8, "z": -22 }, { "x": 29, "y": 8, "z": 10 }, { "x": 20, "y": -2.5, "z": 42 }, { "x": 20, "y": -2.5, "z": 74 }, { "x": 20, "y": -2.5, "z": 106 }, { "x": 20, "y": -2.5, "z": 138 }, { "x": 20, "y": -2.5, "z": 170 }, { "x": -89.56, "y": 8, "z": 178 }, { "x": -89.56, "y": 8, "z": 146 }, { "x": -89.56, "y": 8, "z": 114 }, { "x": -89.56, "y": 8, "z": 82 }, { "x": -89.56, "y": 8, "z": 50 }, { "x": -83, "y": -2.5, "z": 18 }, { "x": -83, "y": -2.5, "z": -14 }, { "x": -83, "y": -2.5, "z": -46 }, { "x": -83, "y": -2.5, "z": -78 }, { "x": -83, "y": -2.5, "z": -110 }]
 let artifacts = []
 let sprites = []
 var offset = 0
 var x = 10
 var i = 1
-
 // remove positons button
-if(!testing){
+if (!testing) {
     pos.style.display = 'none'
 }
-
 // CREATE OBJECTS ON LONG
 positions.forEach(element => {
-
-
     var spritey = makeTextSprite('sprite' + i, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
     spritey.userData.id = i
+    spritey.visible = false
     sprites.push(spritey)
     spritey.position.copy(element)
-
     if (i <= 10) {
         spritey.position.x -= 14
     } else {
         spritey.position.x += 9
     }
-
-
     if (i <= 5 || i > 10 && i < 16) {
         var newArtifact = new THREE.Mesh(wallMountedGeometry, material1);
         newArtifact.name = 'Wallmount-' + i
         newArtifact.position.copy(element)
         newArtifact.userData.pedistal = false
-       
     }
     else {
         var newArtifact = new THREE.Mesh(pedestalGeometry, material1);
@@ -79,57 +84,45 @@ positions.forEach(element => {
         newArtifact.position.y = -2.5 // touch floor
         newArtifact.userData.pedistal = true
     }
-
-
+    if (i > 10) {
+        newArtifact.rotation.y = Math.PI
+    }
     scene.add(spritey);
     artifacts.push(newArtifact)
     scene.add(newArtifact)
+    // light elements
+    const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
+    rectAreaLight.position.copy(newArtifact.position)
+    rectAreaLight.position.y += 20
+    rectAreaLight.rotation.x += 3
+
+    if (i < 10) {
+        rectAreaLight.rotation.y = -Math.PI / 2
+        rectAreaLight.position.x -= 20
+    } else {
+        rectAreaLight.rotation.y = Math.PI / 2
+        rectAreaLight.position.x += 20
+    }
+    rectAreaLight.name = 'light-'+i
+    rectAreaLight.visible = false;
+    scene.add(rectAreaLight)
+
+    
+
     i++
 });
-
-// for (var i = 1; i <= 20;) {
-//     offset += 32
-//     cube[i] = new THREE.Mesh(geometry1, material1);
-//     cube[i].name = 'Artifact' + i
-//     cube[i].userData.id = i
-//     var spritey = makeTextSprite(cube[i].name, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 255, g: 255, b: 200, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-//     spritey.userData.id = i
-//     sprites.push(spritey)
-//     spritey.name = 'sprite' + i
-//     //spritey.id i
-//     cube[i].scale.set(1, 18, 18)
-//     if (i <= 10) {
-//         cube[i].position.set(29, 8, -140 + offset)
-//         spritey.position.set(cube[i].position.x - 15, cube[i].position.y, cube[i].position.z)
-//         //spritey.id= i
-//     }
-//     else if (i <= 21) {
-//         cube[i].position.set(-89.560, 8, cube[10].position.z - offset)
-//         cube[i].rotation.y = Math.PI * 2
-//         spritey.position.set(cube[i].position.x + 10, cube[i].position.y, cube[i].position.z)
-//         //     spritey.id= i
-//     }
-
-
-//     artifacts.push(cube[i])
-//     scene.add(cube[i]);
-//     scene.add(spritey);
-
-//     i++
-//     if (i == 11) {
-//         offset = -40
-//     }
-// }
-
 
 
 
 
 // FOG 
-var fogColor = new THREE.Color(0xffffff);
-scene.background = fogColor;
-scene.fog = new THREE.Fog(fogColor, 0.0025, 700);
 
+const ambientLight = new THREE.HemisphereLight(
+    0xffffcf, // bright sky color
+    0xa67e12, // dim ground color
+    0.8, // intensity
+);
+scene.add(ambientLight)
 
 document.getElementById("pos").addEventListener("click", getAllPositons);
 function getAllPositons(params) {
@@ -138,30 +131,30 @@ function getAllPositons(params) {
         artifacts.forEach(element => {
             posi.push(element.position)
         });
-
         document.getElementById('positions').innerHTML = JSON.stringify(posi);
     }
 }
-
-
-
 // Load a glTF resource
-const loader = new GLTFLoader();
-loader.load(
-    // resource URL
-    './gallery_extended.gltf',
-    // called when the resource is loaded
-    function (gltf) {
-        gltf.scene.scale.set(0.05, 0.05, 0.05)
-        scene.add(gltf.scene);
-        gltf.scene.traverse(n => {
-            if (n.isMesh) {
-                n.castShadow = true;
-                n.receiveShadow = true;
-                if (n.material.map) n.material.map.anisotropy = 16;
-            }
-        });
-    },
+loader.load('./gallery_extended.gltf', function (gltf) {
+    gltf.scene.scale.set(0.05, 0.05, 0.05)
+    // remove from model later 
+    gltf.scene.getObjectByName('Cube011').visible = false
+    gltf.scene.getObjectByName('Cube011_1').visible = false
+    gltf.scene.getObjectByName('Cube012').visible = false
+    gltf.scene.getObjectByName('Cube012_1').visible = false
+    gltf.scene.getObjectByName('Cube014').visible = false
+    gltf.scene.getObjectByName('Cube014_1').visible = false
+    gltf.scene.getObjectByName('Cube015').visible = false
+    gltf.scene.getObjectByName('Cube015_1').visible = false
+    scene.add(gltf.scene);
+    gltf.scene.traverse(n => {
+        if (n.isMesh) {
+            n.castShadow = true;
+            n.receiveShadow = true;
+            if (n.material.map) n.material.map.anisotropy = 16;
+        }
+    });
+},
     // called while loading is progressing
     function (xhr) {
         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -171,16 +164,119 @@ loader.load(
         console.log('An error happened' + error);
     }
 );
+
+// Create bounding box for pedistal items to fit into
+const boundingBoxGeom = new THREE.Mesh(
+    new THREE.BoxGeometry(5, 5, 5),
+    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+);
+boundingBoxGeom.visible = false
+
+scene.add(boundingBoxGeom);
+
+
+// ADD THE USERS MODELS
+
+await axios.get(afcUrl)
+    .then(function (response) {
+        database = response.data.acf.artifacts
+    })
+    .catch(function (error) {
+        console.log(error);
+    })
+    .then(function () {
+        loadModels()
+    });
+
+
+
+
+function loadModels(params) {
+    database.forEach(async (element, i) => {
+        const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
+        var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
+
+        let boundingBoxSize = boundingBox.getSize(new THREE.Vector3());
+        let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
+        loadedArtifact.scene.scale.multiplyScalar(10 / maxAxis);
+        loadedArtifact.scene.position.copy(artifacts[element.location].position)
+        loadedArtifact.scene.rotation.copy(artifacts[element.location].rotation)
+
+        if (artifacts[element.location].userData.pedistal) {
+            loadedArtifact.scene.position.y += 12
+        }
+
+        scene.add(loadedArtifact.scene)
+
+
+        // TURN ON LIGHT AND LABEL
+        scene.getObjectByName('light-'+element.location).visible=true
+        sprites[element.location].visible = true
+        
+
+        //   console.log(loadedArtifact.scene.scale.z)
+        if (i == database.length - 1) {
+            loading.style.display = 'none'
+            start.style.display = 'block'
+        }
+
+    })
+}
+
+
+
+//load textures
+const textureLoader = new THREE.TextureLoader()
+const colorTexture = textureLoader.load(woodenFloor)
+const bumpmap = textureLoader.load(woodenFloorBump)
+colorTexture.wrapS = THREE.RepeatWrapping
+colorTexture.wrapT = THREE.RepeatWrapping
+colorTexture.repeat.x = 20
+colorTexture.repeat.y = 11
+colorTexture.rotation = Math.PI /2
+console.log(colorTexture)
+bumpmap.wrapS = THREE.RepeatWrapping
+bumpmap.wrapT = THREE.RepeatWrapping
+bumpmap.repeat.x = 20
+bumpmap.repeat.y = 11
+bumpmap.rotation = Math.PI /2
+
+// // const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+// const heightTexture = textureLoader.load('/textures/door/height.jpg')
+// const normalTexture = textureLoader.load('/textures/door/normal.jpg')
+// const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+// const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+// const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+
+const geometry = new THREE.PlaneBufferGeometry(150, 600);
+const material = new THREE.MeshPhysicalMaterial({ map: colorTexture})
+// console.log(material)
+material.displacementMap = bumpmap
+// material.metalnessMap = bumpmap
+// material.roughnessMap = bumpmap
+
+const plane = new THREE.Mesh(geometry, material);
+plane.rotation.set(-Math.PI/2, 0, 0)
+plane.position.set(-25, -6.5, 0)
+scene.add( plane );
+console.log(material)
+
+
 // lights
-var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.2);
-scene.add(hemiLight);
-const light = new THREE.AmbientLight(0x404040); // soft white light
-scene.add(light);
+// var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.2);
+// scene.add(hemiLight);
+// const light = new THREE.AmbientLight(0x404040); // soft white light
+// scene.add(light);
+
+
+
+
+
+
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
 // Renderer
-
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
@@ -197,7 +293,6 @@ function onDocumentMouseDown(event) {
     var raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(sprites);
-
     if (intersects.length > 0 && !selectSpot) {
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
             const chosen = intersects[0].object.userData.id
@@ -207,6 +302,9 @@ function onDocumentMouseDown(event) {
     }
 }
 
+
+
+
 // listeners
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -215,9 +313,7 @@ function beginTour(params) {
     document.getElementById("start").style.display = 'none'
     started = true
     intro = true
-
 }
-
 const cameraControls = new CameraControls(camera, renderer.domElement);
 cameraControls.minDistance = 0;
 cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
@@ -228,10 +324,9 @@ cameraControls.maxZoom = 1;
 cameraControls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
 cameraControls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
 cameraControls.enabled = testing ? true : false
-cameraControls.minPolarAngle = Math.PI /2
-cameraControls.maxPolarAngle = Math.PI /2
+cameraControls.minPolarAngle = !testing ? Math.PI / 2 : 0
+cameraControls.maxPolarAngle = !testing ? Math.PI / 2 : Math.PI / 2
 cameraControls.saveState();
-
 // inital view
 camera.lookAt(new THREE.Vector3(0, 0, 0))
 const cameraStand = new THREE.Mesh(
@@ -245,7 +340,6 @@ const meshBBSize = cameraStand.geometry.boundingBox.getSize(new THREE.Vector3())
 const meshBBWidth = meshBBSize.x;
 const meshBBHeight = meshBBSize.y;
 const meshBBDepth = meshBBSize.z;
-
 function customFitTo() {
     const distanceToFit = cameraControls.getDistanceToFitBox(meshBBWidth, meshBBHeight, meshBBDepth);
     cameraControls.moveTo(
@@ -268,41 +362,28 @@ async function lookAtArtifact(params) {
     nextPos.x = artifacts[selectSpot].position.x
     nextPos.y = artifacts[selectSpot].position.y
     nextPos.z = artifacts[selectSpot].position.z
-
     // move camera up for pedistal
-    if(artifacts[selectSpot].userData.pedistal){
-        nextPos.y +=10
+    if (artifacts[selectSpot].userData.pedistal) {
+        nextPos.y += 10
     }
-
     cameraControls.setTarget(nextPos.x, nextPos.y, nextPos.z, true)
-
-
     if (selectSpot <= 9) {
         cameraStand.position.set(nextPos.x - 30, nextPos.y, nextPos.z)
         await cameraControls.setPosition(nextPos.x - 30, nextPos.y, nextPos.z, true)
-
     } else {
         cameraStand.position.set(nextPos.x + 30, nextPos.y, nextPos.z)
         await cameraControls.setPosition(nextPos.x + 30, nextPos.y, nextPos.z, true)
     }
-
     cameraControls.saveState()
     backButton.style.display = 'block'
-
 }
-
 async function turnAround() {
-    // cameraControls.setPosition(0, 0, 0, true)
-    // cameraControls.setTarget(0, 0, -300, true)
-
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
     selectSpot = null
     backButton.style.display = 'none'
 }
-
 const animate = () => {
     // INTRO - WALK INTO ROOM
-
     if (!testing) {
         if (intro && started) {
             startTour()
@@ -314,19 +395,11 @@ const animate = () => {
         //     alert('move back to room')
         //   }
     }
-
-
     const delta = clock.getDelta();
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
     customFitTo()
     return renderer.render(scene, camera);
-
 };
 animate()
-
-
-
-
-
