@@ -3,10 +3,10 @@ export function makeTextSprite(message, parameters) {
     if (parameters === undefined) parameters = {};
     var fontface = parameters.hasOwnProperty("fontface") ? parameters["fontface"] : "Helvetica";
     var fontsize = parameters.hasOwnProperty("fontsize") ? parameters["fontsize"] : 18;
-    var borderThickness = parameters.hasOwnProperty("borderThickness") ? parameters["borderThickness"] : 4;
+    var borderThickness = 3
     var borderColor = parameters.hasOwnProperty("borderColor") ? parameters["borderColor"] : { r: 0, g: 0, b: 0, a: 1.0 };
-    var backgroundColor = parameters.hasOwnProperty("backgroundColor") ? parameters["backgroundColor"] : { r: 1, g: 0, b: 255, a: 1.0 };
-    var textColor = parameters.hasOwnProperty("textColor") ? parameters["textColor"] : { r: 0, g: 2, b: 0, a: 1.0 };
+    var backgroundColor = { r: 255, g: 225, b: 255, a: 1.0 };
+    var textColor = { r: 255, g: 225, b: 255, a: 1.0 };
     var canvas = document.createElement('canvas');
     var context = canvas.getContext('2d');
     context.font = " " + fontsize + "px " + fontface;

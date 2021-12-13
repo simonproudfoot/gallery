@@ -1,15 +1,16 @@
 canvas {
-    display: block; /* fix necessary to remove space at bottom of canvas */
+    display: block;
+    /* fix necessary to remove space at bottom of canvas */
     height: 100vh;
     width: 100vw;
     background-color: black;
 }
 
-html, body{
+html, body {
     margin: 0;
 }
 
-.controls{
+.controls {
     position: fixed;
     bottom: 58px;
     left: 0;
@@ -21,3 +22,31 @@ html, body{
     margin: auto;
 }
 
+html, body {
+    background-color: #000;
+}
+
+#testmode {
+    position: fixed;
+    color: aliceblue;
+}
+
+#infoWindow {
+    display: none;
+    top: 1.5em;
+    left: 1.5em;
+    position: fixed;
+    height: calc(100vh - 3em);
+    width: 50%;
+    background-color: rgb(17, 17, 17, 0.9);
+    z-index: 99;
+}
+
+#goback, #start {
+    display: block;
+    position: fixed;
+    bottom: 44px;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
