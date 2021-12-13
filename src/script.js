@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import CameraControls from 'camera-controls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
 const axios = require('axios').default;
@@ -9,15 +10,29 @@ const loader = new GLTFLoader();
 import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
 import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 
-var testing = false;
-const afcUrl = 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
+import gsap from 'gsap';
+let testing = false;
+if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'test') {
+    testing = true
+    document.getElementById('controls').style.display = 'none'
+    document.getElementById('testmode').style.display = 'block'
+}
+function getThemeDir() {
+    var scripts = document.getElementsByTagName('script'),
+        index = scripts.length - 1,
+        myScript = scripts[index];
+    return myScript.src.replace(/themes\/(.*?)\/(.*)/g, 'themes/$1');
+}
+var themeDir = getThemeDir();
+const afcUrl = process.env.NODE_ENV == 'production' ? 'wp-json/acf/v3/options/acf-options-gallery' : 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
 let database;
-
 const backButton = document.getElementById('goback')
 const pos = document.getElementById('pos')
 const loading = document.getElementById('loading')
 const start = document.getElementById('start')
-
+const textureLoader = new THREE.TextureLoader()
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
 var delta;
 var playing = false
 var intro = false
@@ -37,8 +52,6 @@ const sizes = {
     width: window.innerWidth,
     height: window.innerHeight
 }
-
-
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
 // Scene
@@ -52,6 +65,7 @@ const material1 = new THREE.MeshStandardMaterial({ color: 0xcfc4a0 })
 const positions = [{ "x": 29, "y": 8, "z": -118 }, { "x": 29, "y": 8, "z": -86 }, { "x": 29, "y": 8, "z": -54 }, { "x": 29, "y": 8, "z": -22 }, { "x": 29, "y": 8, "z": 10 }, { "x": 20, "y": -2.5, "z": 42 }, { "x": 20, "y": -2.5, "z": 74 }, { "x": 20, "y": -2.5, "z": 106 }, { "x": 20, "y": -2.5, "z": 138 }, { "x": 20, "y": -2.5, "z": 170 }, { "x": -89.56, "y": 8, "z": 178 }, { "x": -89.56, "y": 8, "z": 146 }, { "x": -89.56, "y": 8, "z": 114 }, { "x": -89.56, "y": 8, "z": 82 }, { "x": -89.56, "y": 8, "z": 50 }, { "x": -83, "y": -2.5, "z": 18 }, { "x": -83, "y": -2.5, "z": -14 }, { "x": -83, "y": -2.5, "z": -46 }, { "x": -83, "y": -2.5, "z": -78 }, { "x": -83, "y": -2.5, "z": -110 }]
 let artifacts = []
 let sprites = []
+let infoPoints = []
 var offset = 0
 var x = 10
 var i = 1
@@ -59,23 +73,40 @@ var i = 1
 if (!testing) {
     pos.style.display = 'none'
 }
+// FLOOR
+const colorTexture = textureLoader.load(woodenFloor)
+const bumpmap = textureLoader.load(woodenFloorBump)
+colorTexture.wrapS = THREE.RepeatWrapping
+colorTexture.wrapT = THREE.RepeatWrapping
+colorTexture.repeat.x = 20
+colorTexture.repeat.y = 11
+colorTexture.rotation = Math.PI / 2
+//console.log(colorTexture)
+bumpmap.wrapS = THREE.RepeatWrapping
+bumpmap.wrapT = THREE.RepeatWrapping
+bumpmap.repeat.x = 20
+bumpmap.repeat.y = 11
+bumpmap.rotation = Math.PI / 2
+const geometry = new THREE.PlaneBufferGeometry(150, 600);
+const material = new THREE.MeshPhysicalMaterial({ map: colorTexture })
+material.displacementMap = bumpmap
+const plane = new THREE.Mesh(geometry, material);
+plane.rotation.set(-Math.PI / 2, 0, 0)
+plane.position.set(-25, -6.5, 0)
+scene.add(plane);
+const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
+const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#171616' })
 // CREATE OBJECTS ON LONG
 positions.forEach(element => {
-    var spritey = makeTextSprite('sprite' + i, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-    spritey.userData.id = i
-    spritey.visible = false
-    sprites.push(spritey)
-    spritey.position.copy(element)
-    if (i <= 10) {
-        spritey.position.x -= 14
-    } else {
-        spritey.position.x += 9
-    }
+    let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
     if (i <= 5 || i > 10 && i < 16) {
         var newArtifact = new THREE.Mesh(wallMountedGeometry, material1);
         newArtifact.name = 'Wallmount-' + i
         newArtifact.position.copy(element)
         newArtifact.userData.pedistal = false
+        infoPoint.position.copy(element)
+        infoPoint.position.z = newArtifact.position.z + 13
+        infoPoint.rotation.y = Math.PI / 2
     }
     else {
         var newArtifact = new THREE.Mesh(pedestalGeometry, material1);
@@ -83,59 +114,44 @@ positions.forEach(element => {
         newArtifact.name = 'Pedistal-' + i
         newArtifact.position.y = -2.5 // touch floor
         newArtifact.userData.pedistal = true
+        infoPoint.position.copy(element)
+        infoPoint.position.x = +3
+        infoPoint.position.z = newArtifact.position.z + 8
+        infoPoint.position.y = 2
+        infoPoint.rotation.y = Math.PI / 2
     }
+    infoPoint.position.y = 10
     if (i > 10) {
         newArtifact.rotation.y = Math.PI
+        infoPoint.position.x = 0
+        infoPoint.position.x = -90
     }
-    scene.add(spritey);
+    else {
+        infoPoint.position.x = +30
+    }
+    infoPoints.push(infoPoint)
     artifacts.push(newArtifact)
     scene.add(newArtifact)
-    // light elements
-    const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
-    rectAreaLight.position.copy(newArtifact.position)
-    rectAreaLight.position.y += 20
-    rectAreaLight.rotation.x += 3
-
-    if (i < 10) {
-        rectAreaLight.rotation.y = -Math.PI / 2
-        rectAreaLight.position.x -= 20
-    } else {
-        rectAreaLight.rotation.y = Math.PI / 2
-        rectAreaLight.position.x += 20
-    }
-    rectAreaLight.name = 'light-'+i
-    rectAreaLight.visible = false;
-    scene.add(rectAreaLight)
-
-    
-
+    scene.add(infoPoint)
     i++
 });
-
-
-
-
-// FOG 
-
 const ambientLight = new THREE.HemisphereLight(
-    0xffffcf, // bright sky color
-    0xa67e12, // dim ground color
+    0xFFFFFF, // bright sky color
+    0xe0d3af, // dim ground color
     0.8, // intensity
 );
 scene.add(ambientLight)
-
 document.getElementById("pos").addEventListener("click", getAllPositons);
 function getAllPositons(params) {
-    if (testing) {
-        var posi = []
-        artifacts.forEach(element => {
-            posi.push(element.position)
-        });
-        document.getElementById('positions').innerHTML = JSON.stringify(posi);
-    }
+    var posi = []
+    artifacts.forEach(element => {
+        posi.push(element.position)
+    });
+    document.getElementById('positions').innerHTML = JSON.stringify(posi);
 }
 // Load a glTF resource
-loader.load('./gallery_extended.gltf', function (gltf) {
+var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './gallery_extended.gltf' : themeDir + '/dist/gallery_extended.gltf'
+loader.load(galleryModelUrl, function (gltf) {
     gltf.scene.scale.set(0.05, 0.05, 0.05)
     // remove from model later 
     gltf.scene.getObjectByName('Cube011').visible = false
@@ -157,26 +173,21 @@ loader.load('./gallery_extended.gltf', function (gltf) {
 },
     // called while loading is progressing
     function (xhr) {
-        console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        //((xhr.loaded / xhr.total * 100) + '% loaded');
     },
     // called when loading has errors
     function (error) {
         console.log('An error happened' + error);
     }
 );
-
 // Create bounding box for pedistal items to fit into
 const boundingBoxGeom = new THREE.Mesh(
     new THREE.BoxGeometry(5, 5, 5),
     new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
 );
 boundingBoxGeom.visible = false
-
 scene.add(boundingBoxGeom);
-
-
 // ADD THE USERS MODELS
-
 await axios.get(afcUrl)
     .then(function (response) {
         database = response.data.acf.artifacts
@@ -190,92 +201,123 @@ await axios.get(afcUrl)
 
 
 
+// INFO WINDOW
+document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
+function closeInfoWindow() {
+    const infoWin = document.getElementById('infoWindow')
+    gsap.to(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 0.3 })
+}
 
-function loadModels(params) {
-    database.forEach(async (element, i) => {
-        const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
-        var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
+function openInfoWindow(i) {
+    let contentTitle = ''
+    let contentDisc = ''
+    if (database.find(x => x.is_model) && database.find(x => x.pedistal_location == selectSpot)) {
+        contentTitle = database.find(x => x.pedistal_location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.pedistal_location == selectSpot).artifact_description
+    }
+    if (database.find(x => x.is_model == false) && database.find(x => x.image_location == selectSpot)) {
+        contentTitle = database.find(x => x.image_location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.image_location == selectSpot).artifact_description
+    }
+    const infoWin = document.getElementById('infoWindow')
+    const title = document.getElementById('infoTitle')
+    const disc = document.getElementById('infoDisc')
+    disc.innerHTML = contentDisc
+    title.innerHTML = contentTitle
+    gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
+}
 
-        let boundingBoxSize = boundingBox.getSize(new THREE.Vector3());
-        let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
-        loadedArtifact.scene.scale.multiplyScalar(10 / maxAxis);
-        loadedArtifact.scene.position.copy(artifacts[element.location].position)
-        loadedArtifact.scene.rotation.copy(artifacts[element.location].rotation)
 
-        if (artifacts[element.location].userData.pedistal) {
-            loadedArtifact.scene.position.y += 12
-        }
+//welcomeMessage
 
-        scene.add(loadedArtifact.scene)
+function welcomeMessage() {
 
-
-        // TURN ON LIGHT AND LABEL
-        scene.getObjectByName('light-'+element.location).visible=true
-        sprites[element.location].visible = true
-        
-
-        //   console.log(loadedArtifact.scene.scale.z)
-        if (i == database.length - 1) {
-            loading.style.display = 'none'
-            start.style.display = 'block'
-        }
-
+    gsap.fromTo('#howto', { opacity: 1, duration: 1, yPercent: 100, }, { opacity: 1, yPercent: 0 }).then(() => {
+        sprites.forEach(x => x.visible = true)
     })
+
+
+    gsap.to('#howto', { opacity: 0, duration: 1.3, yPercent: 100, delay: 3 })
+
 }
 
 
 
-//load textures
-const textureLoader = new THREE.TextureLoader()
-const colorTexture = textureLoader.load(woodenFloor)
-const bumpmap = textureLoader.load(woodenFloorBump)
-colorTexture.wrapS = THREE.RepeatWrapping
-colorTexture.wrapT = THREE.RepeatWrapping
-colorTexture.repeat.x = 20
-colorTexture.repeat.y = 11
-colorTexture.rotation = Math.PI /2
-console.log(colorTexture)
-bumpmap.wrapS = THREE.RepeatWrapping
-bumpmap.wrapT = THREE.RepeatWrapping
-bumpmap.repeat.x = 20
-bumpmap.repeat.y = 11
-bumpmap.rotation = Math.PI /2
 
-// // const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
-// const heightTexture = textureLoader.load('/textures/door/height.jpg')
-// const normalTexture = textureLoader.load('/textures/door/normal.jpg')
-// const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
-// const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
-// const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+function makeSprite(location, label, position) {
+    var spritey = makeTextSprite(label, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+    spritey.userData.id = location
 
-const geometry = new THREE.PlaneBufferGeometry(150, 600);
-const material = new THREE.MeshPhysicalMaterial({ map: colorTexture})
-// console.log(material)
-material.displacementMap = bumpmap
-// material.metalnessMap = bumpmap
-// material.roughnessMap = bumpmap
+    spritey.visible = false
+    spritey.position.copy(position)
+    if (location <= 10) {
+        spritey.position.x -= 14
+    } else {
+        spritey.position.x += 9
+    }
+    sprites.push(spritey)
+    scene.add(spritey);
+}
+function makeLight(location, position) {
+    const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
+    rectAreaLight.position.copy(position)
+    rectAreaLight.position.y += 20
+    if (location < 10) {
+        rectAreaLight.rotation.y = -Math.PI / 2
+        rectAreaLight.position.x -= 20
+    } else {
+        rectAreaLight.rotation.y = Math.PI / 2
+        rectAreaLight.position.x += 20
+    }
+    rectAreaLight.name = 'light-' + location
+    scene.add(rectAreaLight)
+}
+let models = []
+function loadModels(params) {
+    database.forEach(async (element, i) => {
+        // LOAD MODELS
+        if (element.is_model) {
+            const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
+            var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
+            let boundingBoxSize = boundingBox.getSize(new THREE.Vector3());
+            const center = boundingBox.getCenter(new THREE.Vector3());
+            let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
+            loadedArtifact.scene.scale.multiplyScalar(10 / maxAxis);
+            loadedArtifact.scene.position.copy(artifacts[element.pedistal_location].position)
+            loadedArtifact.scene.rotation.copy(artifacts[element.pedistal_location].rotation)
+            //   console.log(loadedArtifact.scene.localToWorld(new THREE.Vector3(0,0,0)))
+            if (artifacts[element.pedistal_location].userData.pedistal) {
+                loadedArtifact.scene.position.y += 12
+            }
+            models.push(loadedArtifact.scene)
+            scene.add(loadedArtifact.scene)
+            makeLight(element.pedistal_location, loadedArtifact.scene.position)
+            makeSprite(element.pedistal_location, element.artifact_title, loadedArtifact.scene.position)
+            // console.log(loadedArtifact.scene.distanceTo(plane.position))
+            // TURN ON LIGHT AND LABEL
+        }
+        // LOAD IMAGES
+        else {
+            const colorTexture = textureLoader.load(element.image.url)
+            var cloned = artifacts[i].material.clone()
+            cloned.map = colorTexture
+            artifacts[i].material = cloned
+            makeLight(element.pedistal_location, artifacts[element.image_location].position)
+            makeSprite(element.image_location, element.artifact_title, artifacts[element.image_location].position)
+        }
+        if (i == database.length - 1) {
+            loading.style.display = 'none'
+            start.style.display = 'block'
 
-const plane = new THREE.Mesh(geometry, material);
-plane.rotation.set(-Math.PI/2, 0, 0)
-plane.position.set(-25, -6.5, 0)
-scene.add( plane );
-console.log(material)
-
-
-// lights
-// var hemiLight = new THREE.HemisphereLight(0xffeeb1, 0x080820, 2.2);
-// scene.add(hemiLight);
-// const light = new THREE.AmbientLight(0x404040); // soft white light
-// scene.add(light);
-
-
-
-
-
-
+        }
+    })
+}
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
+if (testing) {
+    camera.position.y = 400
+}
 // Renderer
 const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
@@ -283,52 +325,86 @@ const renderer = new THREE.WebGLRenderer({
     castShadow: true
 })
 renderer.setSize(sizes.width, sizes.height)
-renderer.shadowMap.enabled = true;
+//renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
+// CLICK ON OBJECTS
 function onDocumentMouseDown(event) {
     event.preventDefault();
-    var mouse = new THREE.Vector2();
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    var raycaster = new THREE.Raycaster();
+
     raycaster.setFromCamera(mouse, camera);
+    var intersectsInfo = raycaster.intersectObjects(infoPoints);
     var intersects = raycaster.intersectObjects(sprites);
     if (intersects.length > 0 && !selectSpot) {
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
-            const chosen = intersects[0].object.userData.id
-            selectSpot = chosen - 1
-            console.log(chosen)
+            selectSpot = intersects[0].object.userData.id
+            intersects[0].object.visible = false
         }
+    }
+    else if (intersectsInfo.length > 0 && selectSpot) {
+        openInfoWindow()
+    }
+}
+
+document.addEventListener('mousemove', onMouseMove, false);
+function onMouseMove(event) {
+    // calculate mouse position in normalized device coordinates
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+    console.log('hek')
+
+    var intersects = raycaster.intersectObjects(sprites);
+    if (intersects.length > 0) {
+        document.body.style.cursor = "pointer";
+        for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
+            //   selectSpot = intersects[0].object.userData.id
+            intersects[i].object.material.color.set(0xff0000);
+           
+
+        }
+    } else {
+        document.body.style.cursor = "default";
+        sprites.forEach(i => i.material.color.set(0xffffff));
     }
 }
 
 
 
-
+// Which camera should we use?
+const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) : new CameraControls(camera, renderer.domElement)
 // listeners
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
+
 document.getElementById("start").addEventListener("click", beginTour);
+
 function beginTour(params) {
     document.getElementById("start").style.display = 'none'
     started = true
     intro = true
 }
-const cameraControls = new CameraControls(camera, renderer.domElement);
-cameraControls.minDistance = 0;
-cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
-cameraControls.polarRotateSpeed = camSpeed; // negative value to invert rotation direction
-cameraControls.minZoom = 1;
-//cameraControls.draggingDampingFactor = 0.01;
-cameraControls.maxZoom = 1;
-cameraControls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
-cameraControls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
-cameraControls.enabled = testing ? true : false
-cameraControls.minPolarAngle = !testing ? Math.PI / 2 : 0
-cameraControls.maxPolarAngle = !testing ? Math.PI / 2 : Math.PI / 2
-cameraControls.saveState();
+if (!testing) {
+    cameraControls.minDistance = 0;
+    cameraControls.azimuthRotateSpeed = camSpeed; // negative value to invert rotation direction
+    cameraControls.polarRotateSpeed = camSpeed; // negative value to invert rotation direction
+    cameraControls.minZoom = 1;
+    //cameraControls.draggingDampingFactor = 0.01;
+    cameraControls.maxZoom = 1;
+    cameraControls.mouseButtons.wheel = CameraControls.ACTION.ZOOM;
+    cameraControls.touches.two = CameraControls.ACTION.TOUCH_ZOOM_TRUCK;
+    cameraControls.enabled = false
+    cameraControls.minPolarAngle = Math.PI / 2
+    cameraControls.maxPolarAngle = Math.PI / 2
+    cameraControls.saveState();
+} else {
+    cameraControls.target.set(0.5, 1, .5)
+    //cameraControls.update()
+}
 // inital view
-camera.lookAt(new THREE.Vector3(0, 0, 0))
+camera.lookAt(new THREE.Vector3(1, 0, 0))
+// CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
     new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
@@ -349,12 +425,15 @@ function customFitTo() {
         true
     );
 }
-cameraControls.setPosition(0, 0, -230)
+if (!testing) {
+    cameraControls.setPosition(0, 0, -230)
+}
 async function startTour() {
     await cameraControls.setPosition(0, 0, 0, true);
     intro = false
     ready = true
     cameraControls.enabled = true
+    welcomeMessage()
     return true
 }
 var nextPos = {}
@@ -379,6 +458,7 @@ async function lookAtArtifact(params) {
 }
 async function turnAround() {
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
+    console.log(sprites.find(x => x.userData.id == selectSpot).visible = true)
     selectSpot = null
     backButton.style.display = 'none'
 }
@@ -387,19 +467,22 @@ const animate = () => {
     if (!testing) {
         if (intro && started) {
             startTour()
-            // canvas.style.cursor = 'pointer'
+
         } else if (selectSpot) {
             lookAtArtifact()
         }
-        // else if (intro && started && !selectSpot) {
-        //     alert('move back to room')
-        //   }
     }
+
+    // update the picking ray with the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+
     const delta = clock.getDelta();
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
-    customFitTo()
+    if (!testing) {
+        customFitTo()
+    }
     return renderer.render(scene, camera);
 };
 animate()
