@@ -42,7 +42,7 @@ html, body {
     z-index: 99;
 }
 
-#goback, #start {
+#goback, #start, #loading {
     display: block;
     position: fixed;
     bottom: 44px;

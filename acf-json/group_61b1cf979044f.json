@@ -1,0 +1,259 @@
+{
+    "key": "group_61b1cf979044f",
+    "title": "Gallery items",
+    "fields": [
+        {
+            "key": "field_61b1d09c3311a",
+            "label": "Artifacts",
+            "name": "artifacts",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "collapsed": "",
+            "min": 0,
+            "max": 0,
+            "layout": "block",
+            "button_label": "Add new artifact",
+            "sub_fields": [
+                {
+                    "key": "field_61b32d5b74f67",
+                    "label": "Artifact title",
+                    "name": "artifact_title",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "100",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                },
+                {
+                    "key": "field_61b32cbb74f65",
+                    "label": "Model or image",
+                    "name": "is_model",
+                    "type": "true_false",
+                    "instructions": "Is this a model to be put on a pedistal or an image to fit into a frame?... \r\nChoose wisely",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_61b1d09c3311a",
+                                "operator": "!=empty"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "100",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "Model",
+                    "ui_off_text": "Image"
+                },
+                {
+                    "key": "field_61b330d998f97",
+                    "label": "image",
+                    "name": "image",
+                    "type": "image",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_61b32cbb74f65",
+                                "operator": "!=",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "array",
+                    "preview_size": "medium",
+                    "library": "all",
+                    "min_width": "",
+                    "min_height": "",
+                    "min_size": "",
+                    "max_width": "",
+                    "max_height": "",
+                    "max_size": "",
+                    "mime_types": ""
+                },
+                {
+                    "key": "field_61b1d1b4d642c",
+                    "label": "3D model",
+                    "name": "3d_model_",
+                    "type": "file",
+                    "instructions": ".GLTF or .GLB file format only",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_61b32cbb74f65",
+                                "operator": "==",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "array",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "gltf, glb"
+                },
+                {
+                    "key": "field_61b1e68b97264",
+                    "label": "Pedistal location",
+                    "name": "pedistal_location",
+                    "type": "button_group",
+                    "instructions": "Select the items position",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_61b32cbb74f65",
+                                "operator": "==",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "6": "6",
+                        "7": "7",
+                        "8": "8",
+                        "9": "9",
+                        "10": "10",
+                        "16": "16",
+                        "17": "17",
+                        "18": "18",
+                        "19": "19",
+                        "20": "20"
+                    },
+                    "allow_null": 0,
+                    "default_value": "",
+                    "layout": "horizontal",
+                    "return_format": "value"
+                },
+                {
+                    "key": "field_61b32fda3eae0",
+                    "label": "Frame location",
+                    "name": "image_location",
+                    "type": "button_group",
+                    "instructions": "Select image frame",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_61b32cbb74f65",
+                                "operator": "!=",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "1": "1",
+                        "2": "2",
+                        "3": "3",
+                        "4": "4",
+                        "5": "5",
+                        "11": "11",
+                        "12": "12",
+                        "13": "13",
+                        "14": "14",
+                        "15": "15"
+                    },
+                    "allow_null": 0,
+                    "default_value": "",
+                    "layout": "horizontal",
+                    "return_format": "value"
+                },
+                {
+                    "key": "field_61b3706c5c3ce",
+                    "label": "Artifact description",
+                    "name": "artifact_description",
+                    "type": "wysiwyg",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "tabs": "all",
+                    "toolbar": "full",
+                    "media_upload": 1,
+                    "delay": 0
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "gallery-items"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "seamless",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "permalink",
+        "the_content",
+        "excerpt",
+        "discussion",
+        "comments",
+        "revisions",
+        "slug",
+        "author",
+        "format",
+        "page_attributes",
+        "featured_image",
+        "categories",
+        "tags",
+        "send-trackbacks"
+    ],
+    "active": true,
+    "description": "",
+    "modified": 1639405159
+}
