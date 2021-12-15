@@ -1,4 +1,5 @@
-import './style.css'
+import './style.scss'
+
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import CameraControls from 'camera-controls';
@@ -27,6 +28,8 @@ var themeDir = getThemeDir();
 const afcUrl = process.env.NODE_ENV == 'production' ? 'http://ducknest.co.uk/npht-gallery/wp-json/acf/v3/options/acf-options-gallery' : 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
 let database;
 const backButton = document.getElementById('goback')
+const left = document.getElementById('left')
+const right = document.getElementById('right')
 const pos = document.getElementById('pos')
 const loading = document.getElementById('loading')
 const start = document.getElementById('start')
@@ -47,7 +50,6 @@ let selectSpot = null
 let observing = false
 let mouseDown = false;
 var camSpeed = -1
-
 
 // sizes
 const sizes = {
@@ -204,6 +206,20 @@ await axios.get(afcUrl)
     });
 
 
+// MOVE ALONG
+document.getElementById("left").addEventListener("click", sideMoves);
+document.getElementById("right").addEventListener("click", sideMoves);
+
+function sideMoves(event) {
+    if (event.target.id == 'left') {
+        selectSpot--
+    }
+    else {
+        selectSpot++
+    }
+    lookAtArtifact()
+}
+
 // INFO WINDOW
 document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
 function closeInfoWindow() {
@@ -234,18 +250,11 @@ function openInfoWindow(i) {
 //welcomeMessage
 
 function welcomeMessage() {
-
     gsap.fromTo('#howto', { opacity: 1, duration: 1, yPercent: 100, }, { opacity: 1, yPercent: 0 }).then(() => {
         sprites.forEach(x => x.visible = true)
     })
-
-
     gsap.to('#howto', { opacity: 0, duration: 1.3, yPercent: 100, delay: 3 })
-
 }
-
-
-
 
 function makeSprite(location, label, position) {
     var spritey = makeTextSprite(label, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
@@ -335,10 +344,6 @@ renderer.setSize(sizes.width, sizes.height)
 //renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
 
-
-
-
-
 // CLICK ON OBJECTS
 function onDocumentMouseDown(event) {
     event.preventDefault();
@@ -353,7 +358,7 @@ function onDocumentMouseDown(event) {
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
 
             selectSpot = parseInt(intersects[0].object.userData.id)
-           // console.log(selectSpot - 1)
+            // console.log(selectSpot - 1)
             intersects[0].object.visible = false
         }
         outlinePass.selectedObjects = []
@@ -403,23 +408,14 @@ function onMouseMove(event) {
         if (intersects.length > 0) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
-                var hoverSpot = intersects[0].object.userData.id-1
-                //console.log('hover',hoverSpot-1)
-                // console.log(hoverSpot)
-
-
+                var hoverSpot = intersects[0].object.userData.id - 1
                 models.forEach(element => {
                     if (element.userData.location == hoverSpot) {
-                    
+
                         outlinePass.selectedObjects = [models[hoverSpot]]
                     }
                 })
-
                 intersects[i].object.material.color.set(0xff0000);
-        
-               // outlinePass.selectedObjects.push(artifacts[hoverSpot])
-                // // console.log(modelSelected)
-
             }
         } else {
             document.body.style.cursor = "default";
@@ -428,8 +424,6 @@ function onMouseMove(event) {
         }
     }
 }
-
-
 
 // Which camera should we use?
 const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) : new CameraControls(camera, renderer.domElement)
@@ -518,6 +512,8 @@ async function lookAtArtifact(params) {
         cameraControls.saveState()
         //  outlinePass.selectedObjects = infoPoints
         backButton.style.display = 'block'
+        left.style.display = 'block'
+        right.style.display = 'block'
     }
 
 }
