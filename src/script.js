@@ -248,7 +248,6 @@ function openInfoWindow(i) {
 
 
 //welcomeMessage
-
 function welcomeMessage() {
     gsap.fromTo('#howto', { opacity: 1, duration: 1, yPercent: 100, }, { opacity: 1, yPercent: 0 }).then(() => {
         sprites.forEach(x => x.visible = true)
@@ -258,7 +257,7 @@ function welcomeMessage() {
 
 function makeSprite(location, label, position) {
     var spritey = makeTextSprite(label, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
-    spritey.userData.id = location
+    spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
     if (location <= 10) {
@@ -291,7 +290,6 @@ function loadModels(params) {
         // LOAD MODELS
         if (element.is_model) {
             var location = parseInt(element.pedistal_location)
-
             var selected = scene.getObjectByName('Pedistal-' + element.pedistal_location)
             const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
             var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
@@ -304,10 +302,8 @@ function loadModels(params) {
             loadedArtifact.scene.userData.location = element.pedistal_location
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.position.y += 12
-
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
-
             makeLight(location, selected.position)
             makeSprite(parseInt(element.pedistal_location), element.artifact_title, loadedArtifact.scene.position)
         }
@@ -369,8 +365,6 @@ function onDocumentMouseDown(event) {
     }
 }
 
-
-
 // outline effetct
 var compose = new EffectComposer(renderer);
 var renderPass = new RenderPass(scene, camera);
@@ -391,30 +385,33 @@ outlinePass.edgeStrength = params.edgeStrength;
 outlinePass.edgeGlow = params.edgeGlow;
 outlinePass.visibleEdgeColor.set(0xffffff);
 outlinePass.hiddenEdgeColor.set(0xffffff);
-
 compose.render(scene, camera)
-
 let hoverSpot = ''
 
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
-    if (!intro && !selectSpot && !testing) {
+    if (!intro && !selectSpot) {
         // calculate mouse position in normalized device coordinates
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
-
         var intersects = raycaster.intersectObjects(sprites);
         if (intersects.length > 0) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
-                var hoverSpot = intersects[0].object.userData.id - 1
+                var hoverSpot = parseInt(intersects[0].object.userData.id)
+         
                 models.forEach(element => {
                     if (element.userData.location == hoverSpot) {
-
-                        outlinePass.selectedObjects = [models[hoverSpot]]
+                        outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
+                    }
+                    else{
+                        outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
                     }
                 })
+
+
+
+                //console.log(outlinePass.selectedObjects.push
                 intersects[i].object.material.color.set(0xff0000);
             }
         } else {
@@ -518,7 +515,6 @@ async function lookAtArtifact(params) {
 
 }
 
-
 async function turnAround() {
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
     // console.log(sprites.find(x => x.userData.id == selectSpot).visible = true)
@@ -526,9 +522,7 @@ async function turnAround() {
     backButton.style.display = 'none'
 }
 
-
 const animate = () => {
-
     // INTRO - WALK INTO ROOM
     if (!testing) {
         if (intro && started) {
@@ -541,7 +535,6 @@ const animate = () => {
 
     // update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
-
     const delta = clock.getDelta();
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
