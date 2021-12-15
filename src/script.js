@@ -211,6 +211,9 @@ document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
 
 function sideMoves(event) {
+    if (selectSpot > 19) {
+        selectSpot = 0
+    }
     if (event.target.id == 'left') {
         selectSpot--
     }
@@ -256,7 +259,8 @@ function welcomeMessage() {
 }
 
 function makeSprite(location, label, position) {
-    var spritey = makeTextSprite(label, { borderColor: { r: 255, g: 255, b: 200, a: 1.0 }, fontsize: 30, backgroundColor: { r: 0, g: 0, b: 0, a: 1.0 }, textColor: { r: 255, g: 255, b: 255, a: 1.0 } });
+    var ranHex = '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+    var spritey = makeTextSprite(label, ranHex);
     spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
@@ -294,7 +298,9 @@ function loadModels(params) {
             const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
             var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
             let boundingBoxSize = boundingBox.getSize(new THREE.Vector3());
+
             const center = boundingBox.getCenter(new THREE.Vector3());
+            boundingBox.center.y = 0
             let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
             loadedArtifact.scene.scale.multiplyScalar(10 / maxAxis);
             loadedArtifact.scene.position.copy(selected.position)
@@ -302,6 +308,11 @@ function loadModels(params) {
             loadedArtifact.scene.userData.location = element.pedistal_location
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.position.y += 12
+
+
+
+
+
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makeLight(location, selected.position)
@@ -399,12 +410,12 @@ function onMouseMove(event) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
-         
+
                 models.forEach(element => {
                     if (element.userData.location == hoverSpot) {
                         outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
                     }
-                    else{
+                    else {
                         outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
                     }
                 })
@@ -520,6 +531,8 @@ async function turnAround() {
     // console.log(sprites.find(x => x.userData.id == selectSpot).visible = true)
     selectSpot = null
     backButton.style.display = 'none'
+    left.style.display = 'none'
+    right.style.display = 'none'
 }
 
 const animate = () => {
