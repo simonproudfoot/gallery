@@ -265,9 +265,9 @@ function makeSprite(location, label, position) {
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
     if (location <= 10) {
-        spritey.position.x -= 14
+        spritey.position.x -= 10
     } else {
-        spritey.position.x += 9
+        spritey.position.x += 5
     }
     sprites.push(spritey)
     scene.add(spritey);
@@ -309,14 +309,11 @@ function loadModels(params) {
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.position.y += 12
 
-
-
-
-
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makeLight(location, selected.position)
             makeSprite(parseInt(element.pedistal_location), element.artifact_title, loadedArtifact.scene.position)
+            
         }
         // LOAD IMAGES
         else {
@@ -401,6 +398,7 @@ let hoverSpot = ''
 
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
+    sprites.forEach(i => i.material.color.set(0xffffff));
     if (!intro && !selectSpot) {
         // calculate mouse position in normalized device coordinates
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -422,12 +420,12 @@ function onMouseMove(event) {
 
 
 
-                //console.log(outlinePass.selectedObjects.push
+
                 intersects[i].object.material.color.set(0xff0000);
             }
         } else {
             document.body.style.cursor = "default";
-            sprites.forEach(i => i.material.color.set(0xffffff));
+           
             outlinePass.selectedObjects = []
         }
     }
