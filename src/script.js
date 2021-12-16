@@ -5,7 +5,7 @@ import CameraControls from 'camera-controls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
-import {enterDoor}from'./animations.js'
+import { enterDoor } from './animations.js'
 import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
 import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
@@ -38,6 +38,7 @@ const start = document.getElementById('start')
 const textureLoader = new THREE.TextureLoader()
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
+const colors = ['#fffdf9', '#5bb5e7', '#159d74', '#d25e1a', '#ca7aa7', '#1074af', '#159d74', '#f5bb4a']
 var delta;
 var playing = false
 var intro = false
@@ -52,7 +53,6 @@ let selectSpot = null
 let observing = false
 let mouseDown = false;
 var camSpeed = -1
-
 // sizes
 const sizes = {
     width: window.innerWidth,
@@ -105,7 +105,6 @@ const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, 
 // CREATE OBJECTS ON LONG
 positions.forEach(element => {
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
-
     if (i <= 5 || i > 10 && i < 16) {
         var newArtifact = new THREE.Mesh(wallMountedGeometry, material1);
         newArtifact.name = 'Wallmount-' + i
@@ -206,12 +205,9 @@ await axios.get(afcUrl)
     .then(function () {
         loadModels()
     });
-
-
 // MOVE ALONG
 document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
-
 function sideMoves(event) {
     if (selectSpot > 19) {
         selectSpot = 0
@@ -224,14 +220,12 @@ function sideMoves(event) {
     }
     lookAtArtifact()
 }
-
 // INFO WINDOW
 document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
 function closeInfoWindow() {
     const infoWin = document.getElementById('infoWindow')
     gsap.to(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 0.3 })
 }
-
 function openInfoWindow(i) {
     let contentTitle = ''
     let contentDisc = ''
@@ -250,18 +244,14 @@ function openInfoWindow(i) {
     title.innerHTML = contentTitle
     gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
 }
-
-
 //welcomeMessage
 function welcomeMessage() {
     sprites.forEach(x => x.visible = true)
-    
-    
+    document.getElementById('menuButton').style.display = 'block'
 }
-
-function makeSprite(location, label, position) {
+function makeSprite(location, label, position, i) {
     var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
-    var spritey = makeTextSprite(label, ranHex);
+    var spritey = makeTextSprite(label, colors[i]);
     spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
@@ -288,11 +278,27 @@ function makeLight(location, position) {
     scene.add(rectAreaLight)
 }
 
+function makeMenuItem(title, position, i) {
+    // add items to menu
+    var modList = document.getElementById('menuItems')
+    var newLI = document.createElement('li');
+    var newSprite = document.createElement('span');
+    newLI.classList.add('text-white')
+    newLI.classList.add('selectTargets')
+    newLI.setAttribute("id", 'artifact-' + position);
+    newLI.setAttribute("data-artifact", +position);
+    newLI.appendChild(document.createTextNode(title));
+    modList.appendChild(newLI);
+    newLI.style.color = colors[i]
+    newSprite.style.borderColor = colors[i]
+    newLI.appendChild(newSprite)
+    document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);
+}
+
 let models = []
 function loadModels(params) {
     database.forEach(async (element, i) => {
         var back = i - 1
-
         // LOAD MODELS
         if (element.is_model) {
             var location = parseInt(element.pedistal_location)
@@ -309,7 +315,6 @@ function loadModels(params) {
             loadedArtifact.scene.userData.location = element.pedistal_location
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.position.y += 12
-
             if (auth) {
                 const itemFolder = gui.addFolder(element.artifact_title)
                 itemFolder.add(loadedArtifact.scene.rotation, 'y', 0, Math.PI * 2).name('Rotate');
@@ -318,8 +323,8 @@ function loadModels(params) {
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makeLight(location, selected.position)
-            makeSprite(parseInt(element.pedistal_location), element.artifact_title, loadedArtifact.scene.position)
-
+            makeSprite(parseInt(element.pedistal_location), element.artifact_title, loadedArtifact.scene.position, i)
+            makeMenuItem(element.artifact_title, element.pedistal_location, i)
         }
         // LOAD IMAGES
         else {
@@ -329,15 +334,21 @@ function loadModels(params) {
             cloned.map = colorTexture
             selected.material = cloned
             makeLight(element.image_location, selected.position)
-            makeSprite(element.image_location, element.artifact_title, selected.position)
+            makeSprite(element.image_location, element.artifact_title, selected.position, i)
+            makeMenuItem(element.artifact_title, element.image_location, i)
         }
-        if (i == database.length - 1) {
-            loading.style.display = 'none'
-            start.style.display = 'block'
 
+
+
+
+        // finished
+        if (i == database.length - 1) {
+            start.style.display = 'block'
+            loading.style.display = 'none'
         }
     })
 }
+
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
@@ -352,43 +363,38 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.physicallyCorrectLights = true
-
 // CLICK ON OBJECTS
 if (auth) {
     const gui = new dat.GUI();
 }
 
+
+function selectObjectFromMenu() {
+    document.getElementById('menu').classList.remove('open')
+    closeMenu()
+    selectSpot = event.target.attributes['data-artifact'].value
+    
+
+}
+
 function onDocumentMouseDown(event) {
     event.preventDefault();
-
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-
     raycaster.setFromCamera(mouse, camera);
     var intersectsInfo = raycaster.intersectObjects(infoPoints);
     var intersects = raycaster.intersectObjects(sprites);
     if (intersects.length > 0 && !selectSpot) {
-
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
-
             selectSpot = parseInt(intersects[0].object.userData.id)
-
             intersects[0].object.visible = false
-
-
-
-
-
         }
         outlinePass.selectedObjects = []
     }
-
     else if (intersectsInfo.length > 0 && selectSpot) {
         openInfoWindow()
     }
-
 }
-
 // outline effetct
 var compose = new EffectComposer(renderer);
 var renderPass = new RenderPass(scene, camera);
@@ -402,16 +408,13 @@ var params = {
     edgeGlow: 2,
     edgeThickness: 0.5,
     pulsePeriod: 3,
-
 };
-
 outlinePass.edgeStrength = params.edgeStrength;
 outlinePass.edgeGlow = params.edgeGlow;
 outlinePass.visibleEdgeColor.set(0xffffff);
 outlinePass.hiddenEdgeColor.set(0xffffff);
 compose.render(scene, camera)
 let hoverSpot = ''
-
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
     sprites.forEach(i => i.material.color.set(0xffffff));
@@ -424,7 +427,6 @@ function onMouseMove(event) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
-
                 models.forEach(element => {
                     if (element.userData.location == hoverSpot) {
                         outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
@@ -433,29 +435,21 @@ function onMouseMove(event) {
                         outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
                     }
                 })
-
-
-
-
                 intersects[i].object.material.color.set(0xff0000);
             }
         } else {
             document.body.style.cursor = "default";
-
             outlinePass.selectedObjects = []
         }
     }
 }
-
 // Which camera should we use?
 const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) : new CameraControls(camera, renderer.domElement)
 // listeners
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.getElementById("start").addEventListener("click", beginTour);
-
 function beginTour(params) {
-
     enterDoor()
     setTimeout(() => {
         started = true
@@ -463,8 +457,6 @@ function beginTour(params) {
         //cameraControls.enabled=true
         document.getElementById("welcomeScreen").style.display = 'none'
     }, 400);
-   
-
     //enterDoor()
 }
 if (!testing) {
@@ -498,7 +490,6 @@ const meshBBSize = cameraStand.geometry.boundingBox.getSize(new THREE.Vector3())
 const meshBBWidth = meshBBSize.x;
 const meshBBHeight = meshBBSize.y;
 const meshBBDepth = meshBBSize.z;
-
 function customFitTo() {
     const distanceToFit = cameraControls.getDistanceToFitBox(meshBBWidth, meshBBHeight, meshBBDepth);
     cameraControls.moveTo(
@@ -522,7 +513,6 @@ async function startTour() {
 var nextPos = {}
 async function lookAtArtifact(params) {
     if (selectSpot) {
-
         console.log(selectSpot)
         nextPos.x = artifacts[selectSpot - 1].position.x
         nextPos.y = artifacts[selectSpot - 1].position.y
@@ -544,11 +534,8 @@ async function lookAtArtifact(params) {
         backButton.style.display = 'block'
         left.style.display = 'block'
         right.style.display = 'block'
-
     }
-
 }
-
 async function turnAround() {
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
     // console.log(sprites.find(x => x.userData.id == selectSpot).visible = true)
@@ -557,35 +544,51 @@ async function turnAround() {
     left.style.display = 'none'
     right.style.display = 'none'
 }
-
 const animate = () => {
     // INTRO - WALK INTO ROOM
     if (!testing) {
         if (intro && started) {
             startTour()
-
         } else if (selectSpot) {
             lookAtArtifact()
-
         }
     }
-
     // update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
     const delta = clock.getDelta();
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
-
     if (!testing) {
         customFitTo()
     }
     return compose.render(scene, camera) && renderer.render(scene, camera);
-
 };
 animate()
-
-
-
 // unhide doc
 document.body.style.display = 'block'
+// open menu
+const menu = document.getElementById('menu')
+const icons = document.querySelectorAll('.icon');
+
+icons.forEach(icon => {
+    icon.addEventListener('click', (event) => {
+        icon.classList.toggle("open");
+        menu.classList.toggle("open");
+        if (menu.classList.contains('open')) {
+            console.log('close')
+            gsap.fromTo(menu, { opacity: 0, x: 300, duration: 0.5, display: 'none' }, { opacity: 1, x: 0, display: 'block' })
+        } else {
+            console.log('open')
+            closeMenu()
+        }
+    });
+});
+
+function closeMenu() {
+    gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
+
+    icons.forEach(icon => {
+    icon.classList.remove("open");
+    })
+}
