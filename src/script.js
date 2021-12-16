@@ -1,17 +1,19 @@
 import './style.scss'
-
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import CameraControls from 'camera-controls';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
-const axios = require('axios').default;
-const loader = new GLTFLoader();
+import {enterDoor}from'./animations.js'
 import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
 import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import gsap from 'gsap';
+import * as dat from 'dat.gui';
+const auth = document.body.classList.contains('logged-in') ? true : false
+const axios = require('axios').default;
+const loader = new GLTFLoader();
 let testing = false;
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'test') {
     testing = true
@@ -252,14 +254,13 @@ function openInfoWindow(i) {
 
 //welcomeMessage
 function welcomeMessage() {
-    gsap.fromTo('#howto', { opacity: 1, duration: 1, yPercent: 100, }, { opacity: 1, yPercent: 0 }).then(() => {
-        sprites.forEach(x => x.visible = true)
-    })
-    gsap.to('#howto', { opacity: 0, duration: 1.3, yPercent: 100, delay: 3 })
+    sprites.forEach(x => x.visible = true)
+    
+    
 }
 
 function makeSprite(location, label, position) {
-    var ranHex = '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
+    var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     var spritey = makeTextSprite(label, ranHex);
     spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
@@ -286,6 +287,7 @@ function makeLight(location, position) {
     rectAreaLight.name = 'light-' + location
     scene.add(rectAreaLight)
 }
+
 let models = []
 function loadModels(params) {
     database.forEach(async (element, i) => {
@@ -298,7 +300,6 @@ function loadModels(params) {
             const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
             var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
             let boundingBoxSize = boundingBox.getSize(new THREE.Vector3());
-
             const center = boundingBox.getCenter(new THREE.Vector3());
             boundingBox.center.y = 0
             let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
@@ -309,11 +310,16 @@ function loadModels(params) {
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.position.y += 12
 
+            if (auth) {
+                const itemFolder = gui.addFolder(element.artifact_title)
+                itemFolder.add(loadedArtifact.scene.rotation, 'y', 0, Math.PI * 2).name('Rotate');
+                itemFolder.add(loadedArtifact.scene.position, 'y', 0, 20).name('Up/Down');
+            }
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makeLight(location, selected.position)
             makeSprite(parseInt(element.pedistal_location), element.artifact_title, loadedArtifact.scene.position)
-            
+
         }
         // LOAD IMAGES
         else {
@@ -345,10 +351,13 @@ const renderer = new THREE.WebGLRenderer({
     castShadow: true
 })
 renderer.setSize(sizes.width, sizes.height)
-//renderer.shadowMap.enabled = true;
 renderer.physicallyCorrectLights = true
 
 // CLICK ON OBJECTS
+if (auth) {
+    const gui = new dat.GUI();
+}
+
 function onDocumentMouseDown(event) {
     event.preventDefault();
 
@@ -359,11 +368,17 @@ function onDocumentMouseDown(event) {
     var intersectsInfo = raycaster.intersectObjects(infoPoints);
     var intersects = raycaster.intersectObjects(sprites);
     if (intersects.length > 0 && !selectSpot) {
+
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
 
             selectSpot = parseInt(intersects[0].object.userData.id)
-            // console.log(selectSpot - 1)
+
             intersects[0].object.visible = false
+
+
+
+
+
         }
         outlinePass.selectedObjects = []
     }
@@ -371,6 +386,7 @@ function onDocumentMouseDown(event) {
     else if (intersectsInfo.length > 0 && selectSpot) {
         openInfoWindow()
     }
+
 }
 
 // outline effetct
@@ -425,7 +441,7 @@ function onMouseMove(event) {
             }
         } else {
             document.body.style.cursor = "default";
-           
+
             outlinePass.selectedObjects = []
         }
     }
@@ -439,9 +455,17 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.getElementById("start").addEventListener("click", beginTour);
 
 function beginTour(params) {
-    document.getElementById("start").style.display = 'none'
-    started = true
-    intro = true
+
+    enterDoor()
+    setTimeout(() => {
+        started = true
+        intro = true
+        //cameraControls.enabled=true
+        document.getElementById("welcomeScreen").style.display = 'none'
+    }, 400);
+   
+
+    //enterDoor()
 }
 if (!testing) {
     cameraControls.minDistance = 0;
@@ -520,6 +544,7 @@ async function lookAtArtifact(params) {
         backButton.style.display = 'block'
         left.style.display = 'block'
         right.style.display = 'block'
+
     }
 
 }
@@ -541,6 +566,7 @@ const animate = () => {
 
         } else if (selectSpot) {
             lookAtArtifact()
+
         }
     }
 
@@ -558,5 +584,8 @@ const animate = () => {
 
 };
 animate()
+
+
+
 
 

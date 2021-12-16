@@ -1,0 +1,27 @@
+.welcomeScreen {
+    position: fixed;
+    height: 100vh;
+    background-color: $black;
+    width: 100%;
+    z-index: 9990;
+    vertical-align: bottom;
+    min-height: 700px;
+    &__innerTop {
+        padding: 9em 1em 0 1em;
+        margin-bottom: 5em;
+        border-left: 8px $yellow solid;
+        vertical-align: bottom;
+
+        &__text {
+            vertical-align: bottom;
+        }
+    }
+
+    &__footer {
+        background: #fff;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+    }
+}

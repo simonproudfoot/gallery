@@ -1,5 +1,6 @@
-@import url("http://fonts.cdnfonts.com/css/gotham");
 @import "~bootstrap";
+@import "./colours";
+@import "./screens";
 // font-family: "Gotham", sans-serif;
 // font-family: "Gotham Black", sans-serif;
 // font-family: "Gotham Light", sans-serif;
@@ -7,6 +8,37 @@
 // font-family: "Gotham XLight", sans-serif;
 // font-family: "Gotham Book", sans-serif;
 // font-family: "Gotham Ultra", sans-serif;
+
+@font-face {
+  font-family: "gothambold";
+  src: url("./fonts/gotham-bold-webfont.woff2") format("woff2"), url("./fonts/gotham-bold-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "gothamthin";
+  src: url("./fonts/gotham-thin-webfont.woff2") format("woff2"), url("./fonts/gotham-thin-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "gothammedium";
+  src: url("./fonts/gothammedium_1-webfont.woff2") format("woff2"),
+    url("./fonts/gothammedium_1-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.container {
+  max-width: 871px;
+}
+
+h1 {
+  font-family: "gothammedium", sans-serif;
+  font-weight: bold;
+}
 
 canvas {
   display: block;
@@ -18,8 +50,9 @@ canvas {
 
 html,
 body {
-  font-family: "Gotham", sans-serif;
+  font-family: "gothammedium", sans-serif;
   margin: 0;
+  //line-height: 1px !important;
 }
 
 .controls {
@@ -55,10 +88,20 @@ body {
   z-index: 99;
 }
 
-// buttons
-#goback,
-#start,
-#loading {
+button {
+  border: none;
+  font-size: 1.5rem !important;
+  border-radius: 0 !important;
+  line-height: 1.5rem !important;
+  padding: 0.8em 1.5em;
+ 
+  font-family: "gothammedium", sans-serif !important;
+  &:hover{
+    background-color: #fff !important;
+  }
+  
+}
+#goback{
   display: block;
   position: fixed;
   bottom: 44px;
