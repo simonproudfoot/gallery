@@ -587,5 +587,5 @@ animate()
 
 
 
-
-
+// unhide doc
+document.body.style.display = 'block'

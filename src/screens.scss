@@ -1,27 +1,75 @@
 .welcomeScreen {
-    position: fixed;
-    height: 100vh;
+
+    overflow-x: hidden;
+    @media (min-width: 768px) {
+        position: fixed;
+        min-height: 100vh;
+    }
+    @media (max-width: 768px) {
+        position: fixed;
+        display: block;
+        min-height: 100%;
+        max-height: calc(100% - 500px);
+        overflow-y: auto;
+    }
     background-color: $black;
     width: 100%;
     z-index: 9990;
     vertical-align: bottom;
     min-height: 700px;
+    overflow-y: scroll;
     &__innerTop {
-        padding: 9em 1em 0 1em;
-        margin-bottom: 5em;
-        border-left: 8px $yellow solid;
-        vertical-align: bottom;
-
-        &__text {
-            vertical-align: bottom;
+        // Medium devices (tablets, 768px and up)
+        @media (min-width: 768px) {
+            margin-bottom: 5em;
+            padding: 9em 1em 0 1em;
         }
+        margin-bottom: 3em;
+        padding: 3em 1em 0 1em;
+        border-left: 8px $yellow solid;
+    }
+
+    &__innerBottom {
+        padding-left: 1.6em;
     }
 
     &__footer {
         background: #fff;
-        position: absolute;
-        bottom: 0;
-        left: 0;
+        @media (min-width: 768px) {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            .logo{ 
+                max-width: 200px;
+            }
+        }
+        @media (max-width: 768px) {
+            position: relative;
+            display: block;
+            .logo{ 
+                max-width: 165px;
+            }
+        }
         width: 100%;
     }
+}
+
+// Small devices (landscape phones, 576px and up)
+@media (min-width: 576px) {
+}
+
+// Medium devices (tablets, 768px and up)
+@media (min-width: 768px) {
+}
+
+// Large devices (desktops, 992px and up)
+@media (min-width: 992px) {
+}
+
+// X-Large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) {
+}
+
+// XX-Large devices (larger desktops, 1400px and up)
+@media (min-width: 1400px) {
 }

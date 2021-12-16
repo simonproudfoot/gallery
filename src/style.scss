@@ -32,7 +32,13 @@
 }
 
 .container {
-  max-width: 871px;
+  @media (min-width: 768px) {
+    max-width: 871px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 2rem;
+  }
 }
 
 h1 {
@@ -94,14 +100,13 @@ button {
   border-radius: 0 !important;
   line-height: 1.5rem !important;
   padding: 0.8em 1.5em;
- 
+
   font-family: "gothammedium", sans-serif !important;
-  &:hover{
+  &:hover {
     background-color: #fff !important;
   }
-  
 }
-#goback{
+#goback {
   display: block;
   position: fixed;
   bottom: 44px;
