@@ -289,7 +289,7 @@ function makeMenuItem(title, position, i) {
     newLI.setAttribute("data-artifact", +position);
     newLI.appendChild(document.createTextNode(title));
     modList.appendChild(newLI);
-    newLI.style.color = colors[i]
+  //  newLI.style.color = colors[i]
     newSprite.style.borderColor = colors[i]
     newLI.appendChild(newSprite)
     document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);

@@ -3,6 +3,17 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCSSExtractPlugin = require('mini-css-extract-plugin')
 const path = require('path')
 
+
+const options = {
+    devServer: false, // false or string with server entry point, e.g: app.js or
+    outPutPath: false, // false for default webpack path of pass string to specify
+    assetsPathPrefix: '',
+    phpClassName: 'WebpackBuiltFiles', //
+    phpFileName: 'WebpackBuiltFiles',
+    nameSpace: false, // false {nameSpace: 'name', use: ['string'] or empty property or don't pass "use" property}
+    path: ''
+}
+
 module.exports = {
     entry: path.resolve(__dirname, '../src/script.js'),
     output:
@@ -12,15 +23,19 @@ module.exports = {
         path: path.resolve(__dirname, '../dist')
     },
     devtool: 'source-map',
-    plugins:
-        [
+    plugins:[
+        
             new CopyWebpackPlugin({
                 patterns: [
                     { from: path.resolve(__dirname, '../static') }
                 ]
             }),
             new HtmlWebpackPlugin({
-                template: path.resolve(__dirname, '../src/index.html'),
+               // template: path.resolve(__dirname, '../src/index.html'),
+                //template: `./test.pug`,
+                template: path.resolve(__dirname, '../index.php'),
+               // filename: `test.php`,
+                foo: 'bar',
                 minify: true
             }),
             new MiniCSSExtractPlugin()
@@ -46,6 +61,7 @@ module.exports = {
             // HTML
             {
                 test: /\.(html)$/,
+             
                 use:
                     [
                         'html-loader'
