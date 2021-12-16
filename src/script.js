@@ -44,6 +44,7 @@ var playing = false
 var intro = false
 var started = false
 var clock = new THREE.Clock();
+let infoWindowOpen = false
 var t = 0
 var ready;
 var last = {}
@@ -225,25 +226,12 @@ document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
 function closeInfoWindow() {
     const infoWin = document.getElementById('infoWindow')
     gsap.to(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 0.3 })
-}
-function openInfoWindow(i) {
-    let contentTitle = ''
-    let contentDisc = ''
-    if (database.find(x => x.is_model) && database.find(x => x.pedistal_location == selectSpot)) {
-        contentTitle = database.find(x => x.pedistal_location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.pedistal_location == selectSpot).artifact_description
+    infoWindowOpen = false
+    if (selectSpot) {
+        showArrows()
     }
-    if (database.find(x => x.is_model == false) && database.find(x => x.image_location == selectSpot)) {
-        contentTitle = database.find(x => x.image_location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.image_location == selectSpot).artifact_description
-    }
-    const infoWin = document.getElementById('infoWindow')
-    const title = document.getElementById('infoTitle')
-    const disc = document.getElementById('infoDisc')
-    disc.innerHTML = contentDisc
-    title.innerHTML = contentTitle
-    gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
 }
+
 //welcomeMessage
 function welcomeMessage() {
     sprites.forEach(x => x.visible = true)
@@ -289,7 +277,7 @@ function makeMenuItem(title, position, i) {
     newLI.setAttribute("data-artifact", +position);
     newLI.appendChild(document.createTextNode(title));
     modList.appendChild(newLI);
-  //  newLI.style.color = colors[i]
+    //  newLI.style.color = colors[i]
     newSprite.style.borderColor = colors[i]
     newLI.appendChild(newSprite)
     document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);
@@ -370,10 +358,14 @@ if (auth) {
 
 
 function selectObjectFromMenu() {
-    document.getElementById('menu').classList.remove('open')
-    closeMenu()
+    const open = document.getElementById('menu').classList.contains('open')
+    if (open) {
+        closeMenu()
+    }
+
+
     selectSpot = event.target.attributes['data-artifact'].value
-    
+
 
 }
 
@@ -385,14 +377,21 @@ function onDocumentMouseDown(event) {
     var intersectsInfo = raycaster.intersectObjects(infoPoints);
     var intersects = raycaster.intersectObjects(sprites);
     if (intersects.length > 0 && !selectSpot) {
+
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
+            showArrows()
             selectSpot = parseInt(intersects[0].object.userData.id)
-            intersects[0].object.visible = false
+            // intersects[0].object.visible = false
         }
+
         outlinePass.selectedObjects = []
+
     }
     else if (intersectsInfo.length > 0 && selectSpot) {
-        openInfoWindow()
+
+        openInfoWindow(database, selectSpot)
+    } else {
+        sprites.forEach(x => x.visible = true)
     }
 }
 // outline effetct
@@ -454,10 +453,8 @@ function beginTour(params) {
     setTimeout(() => {
         started = true
         intro = true
-        //cameraControls.enabled=true
         document.getElementById("welcomeScreen").style.display = 'none'
     }, 400);
-    //enterDoor()
 }
 if (!testing) {
     cameraControls.minDistance = 0;
@@ -537,12 +534,10 @@ async function lookAtArtifact(params) {
     }
 }
 async function turnAround() {
+    hideArrows()
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
-    // console.log(sprites.find(x => x.userData.id == selectSpot).visible = true)
     selectSpot = null
-    backButton.style.display = 'none'
-    left.style.display = 'none'
-    right.style.display = 'none'
+
 }
 const animate = () => {
     // INTRO - WALK INTO ROOM
@@ -553,6 +548,7 @@ const animate = () => {
             lookAtArtifact()
         }
     }
+    spriteOff()
     // update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
     const delta = clock.getDelta();
@@ -587,8 +583,80 @@ icons.forEach(icon => {
 
 function closeMenu() {
     gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
-
     icons.forEach(icon => {
-    icon.classList.remove("open");
+        icon.classList.remove("open");
     })
+}
+
+
+
+function openInfoWindow() {
+    let contentTitle = ''
+    let contentDisc = ''
+    let next = {}
+
+    if (database.find(x => x.is_model) && database.find(x => x.pedistal_location == selectSpot)) {
+
+        contentTitle = database.find(x => x.pedistal_location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.pedistal_location == selectSpot).artifact_description
+        next.title = database.find(x => x.pedistal_location == selectSpot + 1) ? database.find(x => x.pedistal_location == selectSpot + 1).artifact_title : ''
+    }
+    if (database.find(x => x.is_model == false) && database.find(x => x.image_location == selectSpot)) {
+        contentTitle = database.find(x => x.image_location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.image_location == selectSpot).artifact_description
+        next.title = database.find(x => x.image_location == selectSpot + 1) ? database.find(x => x.image_location == selectSpot + 1).artifact_title : ''
+
+    }
+    const infoWin = document.getElementById('infoWindow')
+    const title = document.getElementById('infoTitle')
+    const disc = document.getElementById('infoDisc')
+    const nextStory = document.getElementById('nextStory')
+    disc.innerHTML = contentDisc
+    title.innerHTML = contentTitle
+
+    nextStory.innerHTML = next.title
+    nextStory.setAttribute("data-artifact", +selectSpot + 1);
+    nextStory.addEventListener("click", selectObjectFromMenu);
+
+    gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
+
+    hideArrows()
+
+
+    infoWindowOpen = true
+}
+
+
+function showArrows() {
+    gsap.to('#left', { x: 0, opacity: 1, duration: 1 })
+    gsap.to('#right', { x: 0, opacity: 1, duration: 1 })
+    gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
+}
+
+function hideArrows() {
+    gsap.to('#left', { x: -100, opacity: 0, duration: 1 })
+    gsap.to('#right', { x: 100, opacity: 0, duration: 1 })
+    gsap.to('#goback', { y: 100, opacity: 0, duration: 1 })
+
+}
+
+document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
+
+function spriteOff() {
+    sprites.forEach(sprite => {
+        let distance = cameraStand.position.distanceTo(sprite.position)
+        if (distance < 100 && selectSpot) {
+            // console.log(cameraStand.position.distanceTo(sprite.position))
+            // console.log('id',sprite.userData.id)
+            sprite.visible = false
+        }
+        else {
+            sprite.position.y =- 2
+            sprite.position.y =+ distance / 15 
+            sprite.visible = true
+
+        }
+        //}
+        //   console.log(artifact.position)
+    });
 }

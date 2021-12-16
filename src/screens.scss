@@ -1,3 +1,38 @@
+.infoWindow {
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    height: calc(100vh - 3em);
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 9999;
+    display: none;
+    @media (min-width: 768px) {
+        width: 60%;
+    }
+    &__footer{
+        position: absolute;
+        bottom: 0;
+        cursor: pointer;
+        right: 0;
+        
+    }
+    &__infoTitleBox{
+        padding-left: 2em;
+        padding-top: 60px;
+        border-left: 5px $yellow solid;
+    }
+    &__content{
+        margin-top: 1em;
+        padding-left: 2.4em;
+    }
+    &__close{
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+}
+
 .welcomeScreen {
     overflow-x: hidden;
     @media (min-width: 768px) {
@@ -27,11 +62,9 @@
         padding: 3em 1em 0 1em;
         border-left: 8px $yellow solid;
     }
-
     &__innerBottom {
         padding-left: 1.6em;
     }
-
     &__footer {
         background: #fff;
         @media (min-width: 768px) {
@@ -52,7 +85,6 @@
         width: 100%;
     }
 }
-
 .menu {
     display: none;
     right: 0 !important;
@@ -61,7 +93,6 @@
         position: fixed;
         min-height: 100vh;
         width: 50%;
-       
     }
     @media (max-width: 768px) {
         position: fixed;
@@ -85,7 +116,6 @@
             vertical-align: sub;
             margin-left: 0.8em;
         }
-
         li {
             list-style: none;
             cursor: pointer;
@@ -100,19 +130,15 @@
             }
         }
     }
-
     &__innerTop {
         // Medium devices (tablets, 768px and up)
-      
         margin-bottom: 3em;
         padding: 3em 1em 0 1em;
         border-left: 8px $yellow solid;
     }
-
     &__innerBottom {
         padding-left: 1.6em;
     }
-
     &__footer {
         background: #fff;
         @media (min-width: 768px) {
@@ -133,8 +159,6 @@
         width: 100%;
     }
 }
-
-
 /* nav-icon */
 .nav-icon-wrapper{
     position: fixed;
@@ -144,7 +168,6 @@
     height: 45px;
     z-index: 99999;
     display: none;
-
 }
 .nav-icon{
   width: 35px;
@@ -153,7 +176,6 @@
   position: relative;
   cursor: pointer;
   display: inline-block;
- 
 }
 .nav-icon span{
   background-color:#fff;
@@ -197,24 +219,18 @@
   transform: rotate(-45deg);
   top: 13px;
 }
-
-
 // Small devices (landscape phones, 576px and up)
 @media (min-width: 576px) {
 }
-
 // Medium devices (tablets, 768px and up)
 @media (min-width: 768px) {
 }
-
 // Large devices (desktops, 992px and up)
 @media (min-width: 992px) {
 }
-
 // X-Large devices (large desktops, 1200px and up)
 @media (min-width: 1200px) {
 }
-
 // XX-Large devices (larger desktops, 1400px and up)
 @media (min-width: 1400px) {
 }

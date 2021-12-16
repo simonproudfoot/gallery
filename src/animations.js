@@ -11,3 +11,5 @@ export function enterDoor(){
     gsap.to('.welcomeScreen', { scale: 4, opacity: 0, duration: 1.5 })
 }
 
+
+

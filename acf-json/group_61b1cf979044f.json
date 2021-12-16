@@ -27,7 +27,7 @@
                     "name": "artifact_title",
                     "type": "text",
                     "instructions": "",
-                    "required": 0,
+                    "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "100",
@@ -207,7 +207,7 @@
                     "name": "artifact_description",
                     "type": "wysiwyg",
                     "instructions": "",
-                    "required": 0,
+                    "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
@@ -255,5 +255,5 @@
     ],
     "active": true,
     "description": "",
-    "modified": 1639405159
+    "modified": 1639676288
 }
