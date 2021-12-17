@@ -36,6 +36,13 @@ add_filter('rest_prepare_post', 'acf_to_rest_api', 10, 3);
 
 
 
+add_filter( 'ai1wm_exclude_themes_from_export',
+function ( $exclude_filters ) {
+  $exclude_filters[] = 'npht/node_modules';
+  return $exclude_filters;
+} );
+
+
 
 /* ==========================================================================
     Required
@@ -46,8 +53,8 @@ add_filter('rest_prepare_post', 'acf_to_rest_api', 10, 3);
   // queue required assets
   function queue_theme_assets() {
     
-    wp_enqueue_script( 'script-bundle', get_template_directory_uri() . '/dist/bundle.js', array(), null, true );
-    wp_enqueue_style( 'style-bundle', get_template_directory_uri() . '/dist/main.css', array(), null );
+    wp_enqueue_script( 'script-bundle', get_template_directory_uri() . '/dist/bundle.js', array(), rand(), true );
+    wp_enqueue_style( 'style-bundle', get_template_directory_uri() . '/dist/main.css', array(), rand(), null );
 
     // wp_enqueue_style( 'bootstrap-cdn-css', 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' );
   };

@@ -42,8 +42,8 @@
                         BSL video <br>
                         color blind friendly
                     </div>
-                    <div class="col-md-3 col-12 text-right mt-5 mt-md-0">
-                        <button id="start" class="yellowBack">Enter</button>
+                    <div class="col-12 col-md-3 text-right mt-5 mt-md-0">
+                        <button id="start" class="yellowBack" style="display: none;">Enter</button>
                         <button id="loading" class="yellowBack">Loading...</button>
                     </div>
                 </div>
@@ -52,7 +52,7 @@
     </div>
     <div class="welcomeScreen__footer py-4 mt-5">
         <div class="container">
-            <img class="logo" src="/images/logo.svg" width="300" alt="National paralympic heritage trust logo">
+            <img class="logo" src="<?php bloginfo('template_directory'); ?>/src/images/logo.svg" width="300" alt="National paralympic heritage trust logo">
         </div>
     </div>
 </div>
@@ -64,19 +64,18 @@
     <div class="infoWindow__content" id="infoDisc">
         <p></p>
     </div>
-    <div id="infoWindow__footer" class="infoWindow__footer blackBack">
-        <p class="text-light">Jump to next story</p>
+    <div id="infoWindow__footer" class="infoWindow__footer blackBack py-4 px-5">
+        <p class="text-muted mb-0">Jump to next story</p>
         <h4 id="nextStory" class="text-white"></h4>
+        <span class="ring"></span>
     </div>
 </div>
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
 <canvas class="webgl">
 </canvas>
 <img id="goback" src="<?php bloginfo('template_directory'); ?>/src/images/turn.svg" width="100" height="100" style="display:none;">
-<button id="left" style="display: none;">L</button>
-<button id="right" style="display: none;">R</button>
-<div id="controls" class="controls d-none">
-    {{# <button id="pos" type="button" class="btn btn-primary btn-lg">Get pos</button> #}}
-</div>
+<img id="left" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move left icon" style="transform: scaleX(-1); display: none"></div>
+<img id="right" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move right icon" style="display: none"></div>
+<div id="controls" class="controls d-none"></div>
 </body>
 <?php get_template_part('/includes/footer'); ?>

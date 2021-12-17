@@ -11,7 +11,13 @@ import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import gsap from 'gsap';
 import * as dat from 'dat.gui';
-const auth = document.body.classList.contains('logged-in') ? true : false
+const auth = document.body.classList.contains('logged-in') || process.env.NODE_ENV == 'development' ? true : false
+
+let gui = null
+if (auth) {
+    gui = new dat.GUI();
+}
+
 const axios = require('axios').default;
 const loader = new GLTFLoader();
 let testing = false;
@@ -27,12 +33,12 @@ function getThemeDir() {
     return myScript.src.replace(/themes\/(.*?)\/(.*)/g, 'themes/$1');
 }
 var themeDir = getThemeDir();
-const afcUrl = process.env.NODE_ENV == 'production' ? 'http://ducknest.co.uk/npht-gallery/wp-json/acf/v3/options/acf-options-gallery' : 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
+const afcUrl = process.env.NODE_ENV == 'production' ? window.location + '/wp-json/acf/v3/options/acf-options-gallery' : 'http://localhost:8888/npht/wp-json/acf/v3/options/acf-options-gallery'
 let database;
 const backButton = document.getElementById('goback')
 const left = document.getElementById('left')
 const right = document.getElementById('right')
-const pos = document.getElementById('pos')
+//const pos = document.getElementById('pos')
 const loading = document.getElementById('loading')
 const start = document.getElementById('start')
 const textureLoader = new THREE.TextureLoader()
@@ -77,9 +83,9 @@ var offset = 0
 var x = 10
 var i = 1
 // remove positons button
-if (!testing) {
-    pos.style.display = 'none'
-}
+// if (!testing) {
+//     pos.style.display = 'none'
+// }
 // FLOOR
 const colorTexture = textureLoader.load(woodenFloor)
 const bumpmap = textureLoader.load(woodenFloorBump)
@@ -97,10 +103,23 @@ bumpmap.rotation = Math.PI / 2
 const geometry = new THREE.PlaneBufferGeometry(150, 600);
 const material = new THREE.MeshPhysicalMaterial({ map: colorTexture })
 material.displacementMap = bumpmap
-const plane = new THREE.Mesh(geometry, material);
-plane.rotation.set(-Math.PI / 2, 0, 0)
-plane.position.set(-25, -6.5, 0)
-scene.add(plane);
+const floor = new THREE.Mesh(geometry, material);
+floor.rotation.set(-Math.PI / 2, 0, 0)
+floor.position.set(-25, -6.5, 0)
+floor.name = 'floor'
+scene.add(floor);
+
+
+const ceilingMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#171616' })
+ceilingMaterial.displacementMap = bumpmap
+const ceiling = new THREE.Mesh(geometry, ceilingMaterial);
+ceiling.rotation.set(-Math.PI / 2, 0, 0)
+ceiling.position.set(-25, 24.210, 0)
+ceiling.name = 'ceiling'
+scene.add(ceiling);
+
+
+
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
 const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#171616' })
 // CREATE OBJECTS ON LONG
@@ -149,7 +168,7 @@ const ambientLight = new THREE.HemisphereLight(
     0.8, // intensity
 );
 scene.add(ambientLight)
-document.getElementById("pos").addEventListener("click", getAllPositons);
+//document.getElementById("pos").addEventListener("click", getAllPositons);
 function getAllPositons(params) {
     var posi = []
     artifacts.forEach(element => {
@@ -209,16 +228,28 @@ await axios.get(afcUrl)
 // MOVE ALONG
 document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
+
 function sideMoves(event) {
-    if (selectSpot > 19) {
-        selectSpot = 0
-    }
+
     if (event.target.id == 'left') {
-        selectSpot--
+        if (selectSpot == 1) {
+            selectSpot = 20
+        } else {
+            selectSpot--
+        }
+
     }
-    else {
-        selectSpot++
+    if (event.target.id == 'right') {
+        if (selectSpot == 20) {
+            selectSpot = 1
+        } else {
+            selectSpot++
+        }
+
     }
+    // else {
+    //     selectSpot++
+    // }
     lookAtArtifact()
 }
 // INFO WINDOW
@@ -231,7 +262,6 @@ function closeInfoWindow() {
         showArrows()
     }
 }
-
 //welcomeMessage
 function welcomeMessage() {
     sprites.forEach(x => x.visible = true)
@@ -265,7 +295,6 @@ function makeLight(location, position) {
     rectAreaLight.name = 'light-' + location
     scene.add(rectAreaLight)
 }
-
 function makeMenuItem(title, position, i) {
     // add items to menu
     var modList = document.getElementById('menuItems')
@@ -282,7 +311,6 @@ function makeMenuItem(title, position, i) {
     newLI.appendChild(newSprite)
     document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);
 }
-
 let models = []
 function loadModels(params) {
     database.forEach(async (element, i) => {
@@ -302,12 +330,14 @@ function loadModels(params) {
             loadedArtifact.scene.rotation.copy(selected.rotation)
             loadedArtifact.scene.userData.location = element.pedistal_location
             loadedArtifact.scene.userData.index = i
-            loadedArtifact.scene.position.y += 12
             if (auth) {
                 const itemFolder = gui.addFolder(element.artifact_title)
                 itemFolder.add(loadedArtifact.scene.rotation, 'y', 0, Math.PI * 2).name('Rotate');
                 itemFolder.add(loadedArtifact.scene.position, 'y', 0, 20).name('Up/Down');
             }
+            //            alert(element.model_rotate )
+            loadedArtifact.scene.position.y = element.model_position ? element.model_position : 5
+            loadedArtifact.scene.rotation.y = element.model_rotate ? element.model_rotate : 0
             models.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makeLight(location, selected.position)
@@ -317,26 +347,51 @@ function loadModels(params) {
         // LOAD IMAGES
         else {
             var selected = scene.getObjectByName('Wallmount-' + element.image_location)
-            const colorTexture = textureLoader.load(element.image.url)
-            var cloned = artifacts[0].material.clone()
-            cloned.map = colorTexture
-            selected.material = cloned
-            makeLight(element.image_location, selected.position)
-            makeSprite(element.image_location, element.artifact_title, selected.position, i)
-            makeMenuItem(element.artifact_title, element.image_location, i)
+            selected.userData.location = element.image_location
+            textureLoader.load(element.image.url, (tex) => {
+                // tex and texture are the same in this example, but that might not always be the case
+                console.log(tex.image.width)
+                console.log(tex.image.height)
+                tex.name = 'image-' + element.artifact_title
+                var cloned = artifacts[0].material.clone()
+                cloned.map = tex
+                selected.material = cloned
+                makeLight(element.image_location, selected.position)
+                makeSprite(element.image_location, element.artifact_title, selected.position, i)
+                makeMenuItem(element.artifact_title, element.image_location, i)
+
+
+                var imgSize = tex.image.height / tex.image.width
+                var maxHeight = 1.3
+
+
+                if (imgSize > maxHeight) {
+                    var diff = Math.abs(imgSize - maxHeight)
+                    imgSize -= diff
+                }
+
+                 selected.scale.set(1.0, imgSize, 1.0);
+
+            });
+
+
+
+           
+
+
+
         }
-
-
-
 
         // finished
         if (i == database.length - 1) {
             start.style.display = 'block'
             loading.style.display = 'none'
+
+
+
         }
     })
 }
-
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
@@ -352,23 +407,14 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.physicallyCorrectLights = true
 // CLICK ON OBJECTS
-if (auth) {
-    const gui = new dat.GUI();
-}
-
-
 function selectObjectFromMenu() {
     const open = document.getElementById('menu').classList.contains('open')
     if (open) {
         closeMenu()
     }
-
-
+    showArrows()
     selectSpot = event.target.attributes['data-artifact'].value
-
-
 }
-
 function onDocumentMouseDown(event) {
     event.preventDefault();
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -376,19 +422,15 @@ function onDocumentMouseDown(event) {
     raycaster.setFromCamera(mouse, camera);
     var intersectsInfo = raycaster.intersectObjects(infoPoints);
     var intersects = raycaster.intersectObjects(sprites);
-    if (intersects.length > 0 && !selectSpot) {
-
+    if (intersects.length > 0) {
         for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
             showArrows()
             selectSpot = parseInt(intersects[0].object.userData.id)
             // intersects[0].object.visible = false
         }
-
         outlinePass.selectedObjects = []
-
     }
     else if (intersectsInfo.length > 0 && selectSpot) {
-
         openInfoWindow(database, selectSpot)
     } else {
         sprites.forEach(x => x.visible = true)
@@ -416,29 +458,32 @@ compose.render(scene, camera)
 let hoverSpot = ''
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
-    sprites.forEach(i => i.material.color.set(0xffffff));
-    if (!intro && !selectSpot) {
-        // calculate mouse position in normalized device coordinates
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-        var intersects = raycaster.intersectObjects(sprites);
-        if (intersects.length > 0) {
-            document.body.style.cursor = "pointer";
-            for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
-                var hoverSpot = parseInt(intersects[0].object.userData.id)
-                models.forEach(element => {
-                    if (element.userData.location == hoverSpot) {
-                        outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
-                    }
-                    else {
-                        outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
-                    }
-                })
-                intersects[i].object.material.color.set(0xff0000);
+
+    if (!event.target.classList.contains('allowClick')) {
+        sprites.forEach(i => i.material.color.set(0xffffff));
+        if (!intro && !selectSpot) {
+            // calculate mouse position in normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+            var intersects = raycaster.intersectObjects(sprites);
+            if (intersects.length > 0) {
+                document.body.style.cursor = "pointer";
+                for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
+                    var hoverSpot = parseInt(intersects[0].object.userData.id)
+                    models.forEach(element => {
+                        if (element.userData.location == hoverSpot) {
+                            outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
+                        }
+                        else {
+                            outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
+                        }
+                    })
+                    intersects[i].object.material.color.set(0xff0000);
+                }
+            } else {
+                document.body.style.cursor = "default";
+                outlinePass.selectedObjects = []
             }
-        } else {
-            document.body.style.cursor = "default";
-            outlinePass.selectedObjects = []
         }
     }
 }
@@ -537,7 +582,6 @@ async function turnAround() {
     hideArrows()
     await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
     selectSpot = null
-
 }
 const animate = () => {
     // INTRO - WALK INTO ROOM
@@ -566,7 +610,6 @@ document.body.style.display = 'block'
 // open menu
 const menu = document.getElementById('menu')
 const icons = document.querySelectorAll('.icon');
-
 icons.forEach(icon => {
     icon.addEventListener('click', (event) => {
         icon.classList.toggle("open");
@@ -580,23 +623,18 @@ icons.forEach(icon => {
         }
     });
 });
-
 function closeMenu() {
     gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
     icons.forEach(icon => {
         icon.classList.remove("open");
     })
 }
-
-
-
 function openInfoWindow() {
+    let footer = document.getElementById('infoWindow__footer')
     let contentTitle = ''
     let contentDisc = ''
     let next = {}
-
     if (database.find(x => x.is_model) && database.find(x => x.pedistal_location == selectSpot)) {
-
         contentTitle = database.find(x => x.pedistal_location == selectSpot).artifact_title
         contentDisc = database.find(x => x.pedistal_location == selectSpot).artifact_description
         next.title = database.find(x => x.pedistal_location == selectSpot + 1) ? database.find(x => x.pedistal_location == selectSpot + 1).artifact_title : ''
@@ -605,7 +643,6 @@ function openInfoWindow() {
         contentTitle = database.find(x => x.image_location == selectSpot).artifact_title
         contentDisc = database.find(x => x.image_location == selectSpot).artifact_description
         next.title = database.find(x => x.image_location == selectSpot + 1) ? database.find(x => x.image_location == selectSpot + 1).artifact_title : ''
-
     }
     const infoWin = document.getElementById('infoWindow')
     const title = document.getElementById('infoTitle')
@@ -613,48 +650,55 @@ function openInfoWindow() {
     const nextStory = document.getElementById('nextStory')
     disc.innerHTML = contentDisc
     title.innerHTML = contentTitle
-
-    nextStory.innerHTML = next.title
-    nextStory.setAttribute("data-artifact", +selectSpot + 1);
-    nextStory.addEventListener("click", selectObjectFromMenu);
-
+    if (next.title) {
+        footer.style.display = 'block'
+        nextStory.innerHTML = next.title
+        nextStory.setAttribute("data-artifact", +selectSpot + 1);
+        nextStory.addEventListener("click", selectObjectFromMenu);
+    } else {
+        footer.style.display = 'none'
+    }
     gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
-
     hideArrows()
-
-
     infoWindowOpen = true
 }
-
-
 function showArrows() {
     gsap.to('#left', { x: 0, opacity: 1, duration: 1 })
     gsap.to('#right', { x: 0, opacity: 1, duration: 1 })
     gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
 }
-
 function hideArrows() {
     gsap.to('#left', { x: -100, opacity: 0, duration: 1 })
     gsap.to('#right', { x: 100, opacity: 0, duration: 1 })
     gsap.to('#goback', { y: 100, opacity: 0, duration: 1 })
+}
+document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
+
+window.addEventListener('resize', onWindowResize, false);
+function onWindowResize() {
+    console.log('resizing')
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
 }
 
-document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
+
 
 function spriteOff() {
     sprites.forEach(sprite => {
         let distance = cameraStand.position.distanceTo(sprite.position)
-        if (distance < 100 && selectSpot) {
+        if (distance < 30) {
             // console.log(cameraStand.position.distanceTo(sprite.position))
             // console.log('id',sprite.userData.id)
             sprite.visible = false
         }
         else {
-            sprite.position.y =- 2
-            sprite.position.y =+ distance / 15 
+            sprite.position.y = - 2
+            sprite.position.y = + distance / 15
             sprite.visible = true
-
         }
         //}
         //   console.log(artifact.position)
