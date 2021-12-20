@@ -9,7 +9,6 @@
 // font-family: "Gotham XLight", sans-serif;
 // font-family: "Gotham Book", sans-serif;
 // font-family: "Gotham Ultra", sans-serif;
-
 @font-face {
   font-family: "gothambold";
   src: url("./fonts/gotham-bold-webfont.woff2") format("woff2"), url("./fonts/gotham-bold-webfont.woff") format("woff");
@@ -32,6 +31,10 @@
   font-style: normal;
 }
 
+
+p{
+  font-family: "gothamthin";
+}
 
 #wpadminbar{
   background-color: $yellow !important;

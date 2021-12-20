@@ -56,19 +56,23 @@
         </div>
     </div>
 </div>
-<div id="infoWindow" class="infoWindow pb-5 px-5 text-black">
-    <div class="infoWindow__infoTitleBox">
-        <button class="infoWindow__close" id="infoClose">x</button>
-        <h1 id="infoTitle" class="pb-0 mb-0 text-capitalize"></h1>
+<div id="infoWindow" class="infoWindow  text-black">
+    <div class="pb-5 px-5" style="min-height: calc(100vh - 156px)">
+        <div class="infoWindow__infoTitleBox">
+            <button class="infoWindow__close" id="infoClose">x</button>
+            <h1 id="infoTitle" class="pb-0 mb-0 text-capitalize"></h1>
+        </div>
+        <div class="infoWindow__content" id="infoDisc">
+        </div>
     </div>
-    <div class="infoWindow__content" id="infoDisc">
-        <p></p>
+    <div id="infoWindow__footer" class="infoWindow__footer">
+        <div class="infoWindow__footer__next blackBack py-4 px-5"">
+            <p class="text-muted mb-0">Jump to next story</p>
+            <h4 id="nextStory" class="text-white"></h4>
+            <span class="ring"></span>
+        </div>
     </div>
-    <div id="infoWindow__footer" class="infoWindow__footer blackBack py-4 px-5">
-        <p class="text-muted mb-0">Jump to next story</p>
-        <h4 id="nextStory" class="text-white"></h4>
-        <span class="ring"></span>
-    </div>
+
 </div>
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
 <canvas class="webgl">

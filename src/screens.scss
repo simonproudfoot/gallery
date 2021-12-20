@@ -6,15 +6,23 @@
     width: 100%;
     background-color: rgba(255, 255, 255, 0.9);
     z-index: 9999;
+    overflow-y: auto;
     display: none;
     @media (min-width: 768px) {
         width: 60%;
     }
+    &__inner{
+        overflow-y: scroll;
+        border: 1px red dashed;
+    }
     &__footer{
-        position: absolute;
-        bottom: 0;
+        position: relative;
         cursor: pointer;
-        right: 0;
+        
+        &__next{
+            max-width: 400px;
+            margin-left: auto;
+        }
         
     }
     &__infoTitleBox{
@@ -25,6 +33,7 @@
     &__content{
         margin-top: 1em;
         padding-left: 2.4em;
+        overflow-y: auto;
     }
     &__close{
         position: absolute;
