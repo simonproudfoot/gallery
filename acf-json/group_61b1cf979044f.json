@@ -126,21 +126,13 @@
                     "mime_types": "gltf, glb"
                 },
                 {
-                    "key": "field_61b1e68b97264",
-                    "label": "Pedistal location",
-                    "name": "pedistal_location",
+                    "key": "field_61b32fda3eae0",
+                    "label": "Location",
+                    "name": "location",
                     "type": "button_group",
-                    "instructions": "Select the items position",
+                    "instructions": "Select image frame",
                     "required": 0,
-                    "conditional_logic": [
-                        [
-                            {
-                                "field": "field_61b32cbb74f65",
-                                "operator": "==",
-                                "value": "1"
-                            }
-                        ]
-                    ],
+                    "conditional_logic": 0,
                     "wrapper": {
                         "width": "",
                         "class": "",
@@ -167,44 +159,6 @@
                         "18": "18",
                         "19": "19",
                         "20": "20"
-                    },
-                    "allow_null": 0,
-                    "default_value": "",
-                    "layout": "horizontal",
-                    "return_format": "value"
-                },
-                {
-                    "key": "field_61b32fda3eae0",
-                    "label": "Frame location",
-                    "name": "image_location",
-                    "type": "button_group",
-                    "instructions": "Select image frame",
-                    "required": 0,
-                    "conditional_logic": [
-                        [
-                            {
-                                "field": "field_61b32cbb74f65",
-                                "operator": "!=",
-                                "value": "1"
-                            }
-                        ]
-                    ],
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "choices": {
-                        "1": "1",
-                        "2": "2",
-                        "3": "3",
-                        "4": "4",
-                        "5": "5",
-                        "11": "11",
-                        "12": "12",
-                        "13": "13",
-                        "14": "14",
-                        "15": "15"
                     },
                     "allow_null": 0,
                     "default_value": "",
@@ -346,5 +300,5 @@
     ],
     "active": true,
     "description": "",
-    "modified": 1640003856
+    "modified": 1640106620
 }

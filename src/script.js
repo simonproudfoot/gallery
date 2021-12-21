@@ -13,6 +13,7 @@ import positions from './positions.json'
 import gsap from 'gsap';
 import * as dat from 'dat.gui';
 
+
 const axios = require('axios').default;
 const loader = new GLTFLoader();
 let testing = false;
@@ -222,7 +223,7 @@ const boundingBoxGeom = new THREE.Mesh(
 );
 boundingBoxGeom.visible = false
 scene.add(boundingBoxGeom);
-// ADD THE USERS MODELS
+// ADD THE USERS artifacts
 await axios.get(afcUrl)
     .then(function (response) {
         database = response.data.acf.artifacts
@@ -231,24 +232,29 @@ await axios.get(afcUrl)
         console.log(error);
     })
     .then(function () {
-        loadModels()
+        loadartifacts()
     });
 // MOVE ALONG
 document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
 
 function sideMoves(event) {
-
     if (event.target.id == 'left') {
-        if (selectSpot == 1) {
-            selectSpot = 20
-        } else {
-            selectSpot--
-        }
+        const cur = selectSpot - 1
+        artifacts.forEach((element, i) => {
 
+            if (element.userData.location == cur) {
+                const prev = i - 1
+                // console.log('prev',prev)
+                console.log('prev name', artifacts[prev].name)
+                console.log('prev to', artifacts[prev].userData.location)
+
+                 selectSpot = artifacts[prev].userData.location+1
+            }
+        });
     }
     if (event.target.id == 'right') {
-        if (selectSpot == 20) {
+        if (selectSpot == 19) {
             selectSpot = 1
         } else {
             selectSpot++
@@ -279,7 +285,7 @@ function welcomeMessage() {
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
 const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#171616' })
 function makeInfoPoint(location) {
-    console.log(location)
+
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
     infoPoint.position.copy(positions[location])
     infoPoint.position.y = 10
@@ -287,14 +293,14 @@ function makeInfoPoint(location) {
 
     if (between(location, 0, 9)) {
         infoPoint.name = 'infoPoint' + location
-          infoPoint.position.x = 30
-          infoPoint.position.z +=8
+        infoPoint.position.x = 30
+        infoPoint.position.z += 8
 
         infoPoint.rotation.y = Math.PI / 2
         // infoPoint.position.x 
     }
     if (between(location, 9, 16)) {
-        infoPoint.position.x -=8
+        infoPoint.position.x -= 8
     }
     if (between(location, 15, 20)) {
         infoPoint.rotation.y = Math.PI / 2
@@ -377,7 +383,7 @@ function makeMenuItem(title, position, i) {
     newLI.classList.add('selectTargets')
     newLI.setAttribute("id", 'artifact-' + position);
     newLI.setAttribute("data-artifact", +position);
-    newLI.appendChild(document.createTextNode(title));
+    newLI.appendChild(document.createTextNode(title + '-' + i));
     modList.appendChild(newLI);
     //  newLI.style.color = colors[i]
     newSprite.style.borderColor = colors[i]
@@ -391,7 +397,7 @@ function between(x, min, max) {
 function calcPesistalPosition(position, location) {
 
     if (between(location, 0, 9)) {
-        console.log('less', location)
+
         position.x -= 10
     }
     if (between(location, 9, 16)) {
@@ -404,6 +410,22 @@ function calcPesistalPosition(position, location) {
     return position
 }
 
+function calcWallmountRotation(location) {
+    var rotation;
+
+    if (between(location, 0, 9)) {
+        rotation = 0
+    }
+    if (between(location, 9, 16)) {
+        rotation = Math.PI / 2
+    }
+    if (between(location, 15, 20)) {
+        rotation = 0
+    }
+
+    return rotation
+}
+
 function makePedistal(position, location) {
     // create a pedistal
     var newArtifact = new THREE.Mesh(pedestalGeometry, material1);
@@ -413,12 +435,27 @@ function makePedistal(position, location) {
     scene.add(newArtifact)
 }
 
-let models = []
-function loadModels(params) {
-    database.forEach(async (element, i) => {
-        // LOAD MODELSf
+
+function makeWallMount(location) {
+    // create a pedistal
+    const position = positions[location]
+    var newWallmount = new THREE.Mesh(wallMountedGeometry, material1);
+    newWallmount.position.set(position.x, position.y + 8, position.z)
+    newWallmount.rotation.y = calcWallmountRotation(location)
+
+    scene.add(newWallmount)
+
+    return newWallmount
+
+}
+
+console.log(database)
+function loadartifacts(params) {
+    database.sort((a, b) => parseFloat(a.location) - parseFloat(b.location)).forEach(async (element, i) => {
+        // LOAD artifactsf
+        var location = parseInt(element.location) - 1
         if (element.is_model) {
-            var location = parseInt(element.pedistal_location) - 1
+
             var selected = positions[location]
             const loadedArtifact = await loader.loadAsync(element['3d_model_']['url']);
             var boundingBox = new THREE.Box3().setFromObject(loadedArtifact.scene);
@@ -430,7 +467,10 @@ function loadModels(params) {
             loadedArtifact.scene.position.copy(selected)
             loadedArtifact.scene.userData.location = location
             loadedArtifact.scene.userData.index = i
+            loadedArtifact.scene.userData.id = location
             loadedArtifact.scene.position.copy(calcPesistalPosition(loadedArtifact.scene.position, location))
+            loadedArtifact.scene.userData.pedistal = true
+            loadedArtifact.scene.name = element.artifact_title
             if (showSettings) {
                 const itemFolder = gui.addFolder(element.artifact_title)
                 itemFolder.add(loadedArtifact.scene.rotation, 'y', 0, Math.PI * 2).name('Rotate');
@@ -438,7 +478,7 @@ function loadModels(params) {
             }
             loadedArtifact.scene.position.y = element.model_position ? element.model_position : 5
             loadedArtifact.scene.rotation.y = element.model_rotate ? element.model_rotate : 0
-            models.push(loadedArtifact.scene)
+            artifacts.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
@@ -448,36 +488,36 @@ function loadModels(params) {
         }
         // LOAD IMAGES
         else {
-            // var selected = scene.getObjectByName('Wallmount-' + element.image_location)
-            // selected.userData.location = element.image_location
-            // textureLoader.load(element.image.url, (tex) => {
-            //     // tex and texture are the same in this example, but that might not always be the case
-            //     console.log(tex.image.width)
-            //     console.log(tex.image.height)
-            //     tex.name = 'image-' + element.artifact_title
-            //     var cloned = artifacts[0].material.clone()
-            //     cloned.map = tex
-            //     selected.material = cloned
-            //     makeLight(element.image_location, selected.position)
-            //     makeSprite(element.image_location, element.artifact_title, selected.position, i)
-            //     makeMenuItem(element.artifact_title, element.image_location, i)
 
 
-            //     var imgSize = tex.image.height / tex.image.width
-            //     var maxHeight = 1.3
+            let mount = makeWallMount(location) // position
+            mount.userData.id = location
+            mount.userData.pedistal = false
+            mount.userData.index = i
+            mount.userData.location = location
+            mount.name = element.artifact_title
+            textureLoader.load(element.image.url, (tex) => {
+                // tex and texture are the same in this example, but that might not always be the case
 
+                tex.name = 'image-' + element.artifact_title
+                var cloned = mount.material.clone()
+                cloned.map = tex
+                mount.material = cloned
+                makeLight(location, mount.position)
+                makeSprite(location, mount.position, i)
+                makeMenuItem(element.artifact_title, element.location, i)
+                var imgSize = tex.image.height / tex.image.width
+                var maxHeight = 1.3
 
-            //     if (imgSize > maxHeight) {
-            //         var diff = Math.abs(imgSize - maxHeight)
-            //         imgSize -= diff
-            //     }
+                if (imgSize > maxHeight) {
+                    var diff = Math.abs(imgSize - maxHeight)
+                    imgSize -= diff
+                }
 
-            //     selected.scale.set(1.0, imgSize, 1.0);
+                mount.scale.set(1.0, imgSize, 1.0);
+                artifacts.push(mount)
 
-            // });
-
-
-
+            });
 
 
         }
@@ -486,9 +526,7 @@ function loadModels(params) {
         if (i == database.length - 1) {
             start.style.display = 'block'
             loading.style.display = 'none'
-
-
-
+            console.log(artifacts)
         }
     })
 }
@@ -517,6 +555,7 @@ function selectObjectFromMenu() {
 }
 
 function onDocumentMouseDown(event) {
+
     if (!event.target.classList.contains('allowClick')) {
         event.preventDefault();
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -525,9 +564,11 @@ function onDocumentMouseDown(event) {
         var intersectsInfo = raycaster.intersectObjects(infoPoints);
         var intersects = raycaster.intersectObjects(sprites);
         if (intersects.length > 0) {
+
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 showArrows()
-                selectSpot = parseInt(intersects[0].object.userData.id)
+                selectSpot = parseInt(intersects[0].object.userData.id + 1)
+
                 outlinePass.selectedObjects = [infoPoints[selectSpot - 1]]
             }
         }
@@ -542,7 +583,7 @@ function onDocumentMouseDown(event) {
 // outline effetct
 var compose = new EffectComposer(renderer);
 var renderPass = new RenderPass(scene, camera);
-var outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, models);
+var outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, artifacts);
 outlinePass.renderToScreen = true;
 outlinePass.selectedObjects = '';
 compose.addPass(renderPass);
@@ -564,9 +605,6 @@ function onMouseMove(event) {
 
     sprites.forEach(i => i.material.color.set(0xffffff));
 
-
-
-
     if (!intro && !selectSpot) {
 
         // calculate mouse position in normalized device coordinates
@@ -586,7 +624,7 @@ function onMouseMove(event) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
-                models.forEach(element => {
+                artifacts.forEach(element => {
                     if (element.userData.location == hoverSpot) {
                         outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
                     }
@@ -614,7 +652,7 @@ function beginTour(params) {
         started = true
         intro = true
         document.getElementById("welcomeScreen").style.display = 'none'
-        selectSpot = 1
+        //   selectSpot = 1
     }, 400);
 }
 if (!testing) {
@@ -645,13 +683,14 @@ const cameraStand = new THREE.Mesh(
 );
 scene.add(cameraStand);
 cameraStand.geometry.computeBoundingBox();
-cameraStand.visible = false
+cameraStand.visible = true
 const meshBBSize = cameraStand.geometry.boundingBox.getSize(new THREE.Vector3());
 const meshBBWidth = meshBBSize.x;
 const meshBBHeight = meshBBSize.y;
 const meshBBDepth = meshBBSize.z;
 function customFitTo() {
     const distanceToFit = cameraControls.getDistanceToFitBox(meshBBWidth, meshBBHeight, meshBBDepth);
+    ///alert(distanceToFit)
     cameraControls.moveTo(
         cameraStand.position.x,
         cameraStand.position.y,
@@ -673,44 +712,73 @@ async function startTour() {
 var nextPos = {}
 async function lookAtArtifact(params) {
     if (selectSpot) {
-        outlinePass.selectedObjects = [infoPoints[selectSpot - 1]]
-        console.log(selectSpot)
-        nextPos.x = artifacts[selectSpot - 1].position.x
-        nextPos.y = artifacts[selectSpot - 1].position.y
-        nextPos.z = artifacts[selectSpot - 1].position.z
-        // move camera up for pedistal
-        if (artifacts[selectSpot - 1].userData.pedistal) {
-            nextPos.y += 10
-        }
-        cameraControls.setTarget(nextPos.x, nextPos.y, nextPos.z, true)
-        if (selectSpot <= 9) {
-            cameraStand.position.set(nextPos.x - 30, nextPos.y, nextPos.z)
-            await cameraControls.setPosition(nextPos.x - 30, nextPos.y, nextPos.z, true)
-        } else {
-            cameraStand.position.set(nextPos.x + 30, nextPos.y, nextPos.z)
-            await cameraControls.setPosition(nextPos.x + 30, nextPos.y, nextPos.z, true)
-        }
-        cameraControls.saveState()
-        //  outlinePass.selectedObjects = infoPoints
-        backButton.style.display = 'block'
-        left.style.display = 'block'
-        right.style.display = 'block'
+        const location = selectSpot - 1
+
+        // console.log(location)
+        artifacts.forEach(element => {
+            //console.log('obj',element.userData.location)
+            if (element.userData.location == location) {
+                nextPos.x = element.position.x
+                nextPos.y = 2
+                nextPos.z = element.position.z
+            }
+        })
     }
+
+
+
+    //     console.log(object)
+    //     // if ([infoPoints[selectSpot]] != undefined) {
+    //     //     outlinePass.selectedObjects = [infoPoints[selectSpot] - 1]
+    //     // }
+    //     nextPos.x = object.position.x
+    //     nextPos.y = object.position.y
+    //     nextPos.z = object.position.z
+    //     //     // move camera up for pedistal
+    //     //     if (object.userData.pedistal) {
+    //     //         nextPos.y += 10
+    //     //     }
+
+
+    if (between(selectSpot, 0, 9)) {
+        cameraStand.position.set(nextPos.x - 30, nextPos.y, nextPos.z)
+        await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
+
+    }
+    if (between(selectSpot, 9, 16)) {
+        cameraStand.position.set(nextPos.x, nextPos.y, nextPos.z - 30)
+        await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
+    }
+    if (between(selectSpot, 15, 20)) {
+        cameraStand.position.set(nextPos.x + 30, nextPos.y, nextPos.z)
+        await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
+    }
+
+    //     //     //  outlinePass.selectedObjects = infoPoints
+    backButton.style.display = 'block'
+    left.style.display = 'block'
+    right.style.display = 'block'
+    // }
 }
+
 async function turnAround() {
     hideArrows()
-    await cameraControls.setLookAt(cameraStand.position.x, 0, cameraStand.position.z, 0, 0, cameraStand.position.z, true)
+    if (!testing) {
+
+
+        await cameraControls.setLookAt(cameraStand.position.x, cameraStand.position.y, cameraStand.position.z, 0, 2, 0, true)
+    }
     selectSpot = null
 }
 const animate = () => {
     // INTRO - WALK INTO ROOM
-    if (!testing) {
-        if (intro && started) {
-            startTour()
-        } else if (selectSpot) {
-            lookAtArtifact()
-        }
+
+    if (intro && started) {
+        startTour()
+    } else if (selectSpot) {
+        lookAtArtifact()
     }
+
     spriteOff()
     // update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
@@ -721,7 +789,8 @@ const animate = () => {
     if (!testing) {
         customFitTo()
     }
-    return compose.render(scene, camera) && renderer.render(scene, camera);
+    //  return compose.render(scene, camera) && renderer.render(scene, camera);
+    return renderer.render(scene, camera);
 };
 animate()
 // unhide doc
@@ -734,10 +803,10 @@ icons.forEach(icon => {
         icon.classList.toggle("open");
         menu.classList.toggle("open");
         if (menu.classList.contains('open')) {
-            console.log('close')
+
             gsap.fromTo(menu, { opacity: 0, x: 300, duration: 0.5, display: 'none' }, { opacity: 1, x: 0, display: 'block' })
         } else {
-            console.log('open')
+
             closeMenu()
         }
     });
@@ -753,15 +822,15 @@ function openInfoWindow() {
     let contentTitle = ''
     let contentDisc = ''
     let next = {}
-    if (database.find(x => x.is_model) && database.find(x => x.pedistal_location == selectSpot)) {
-        contentTitle = database.find(x => x.pedistal_location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.pedistal_location == selectSpot).artifact_description
-        next.title = database.find(x => x.pedistal_location == selectSpot + 1) ? database.find(x => x.pedistal_location == selectSpot + 1).artifact_title : ''
+    if (database.find(x => x.is_model) && database.find(x => x.location == selectSpot)) {
+        contentTitle = database.find(x => x.location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.location == selectSpot).artifact_description
+        next.title = database.find(x => x.location == selectSpot + 1) ? database.find(x => x.location == selectSpot + 1).artifact_title : ''
     }
-    if (database.find(x => x.is_model == false) && database.find(x => x.image_location == selectSpot)) {
-        contentTitle = database.find(x => x.image_location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.image_location == selectSpot).artifact_description
-        next.title = database.find(x => x.image_location == selectSpot + 1) ? database.find(x => x.image_location == selectSpot + 1).artifact_title : ''
+    if (database.find(x => x.is_model == false) && database.find(x => x.location == selectSpot)) {
+        contentTitle = database.find(x => x.location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.location == selectSpot).artifact_description
+        next.title = database.find(x => x.location == selectSpot + 1) ? database.find(x => x.location == selectSpot + 1).artifact_title : ''
     }
     const infoWin = document.getElementById('infoWindow')
     const title = document.getElementById('infoTitle')
@@ -795,7 +864,7 @@ document.getElementById("infoWindow__footer").addEventListener("click", closeInf
 
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
-    console.log('resizing')
+
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
