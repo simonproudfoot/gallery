@@ -252,7 +252,7 @@ function welcomeMessage() {
     document.getElementById('menuButton').style.display = 'block'
 }
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
-const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#fff' })
+const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#000' })
 function makeInfoPoint(location, wallmount) {
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
     infoPoint.position.copy(positions[location])
@@ -437,7 +437,7 @@ function loadartifacts(params) {
 
             artifacts.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
-           
+
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
             makeSprite(location, loadedArtifact.scene.position, i)
@@ -513,10 +513,11 @@ function onDocumentMouseDown(event) {
         var intersectsInfo = raycaster.intersectObjects(infoPoints);
         var intersects = raycaster.intersectObjects(sprites);
         if (intersects.length > 0) {
+            // outlinePass.selectedObjects = artifacts
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 showArrows()
                 selectSpot = parseInt(intersects[0].object.userData.id + 1)
-                outlinePass.selectedObjects = [infoPoints[selectSpot - 1]]
+
             }
         }
         else if (intersectsInfo.length > 0 && selectSpot) {
@@ -529,9 +530,8 @@ function onDocumentMouseDown(event) {
 // outline effetct
 var compose = new EffectComposer(renderer);
 var renderPass = new RenderPass(scene, camera);
-var outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera, artifacts);
+var outlinePass = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
 outlinePass.renderToScreen = true;
-outlinePass.selectedObjects = '';
 compose.addPass(renderPass);
 compose.addPass(outlinePass);
 var params = {
@@ -546,6 +546,7 @@ outlinePass.visibleEdgeColor.set(0xffffff);
 outlinePass.hiddenEdgeColor.set(0xffffff);
 compose.render(scene, camera)
 let hoverSpot = ''
+console.log(outlinePass)
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
     sprites.forEach(i => i.material.color.set(0xffffff));
@@ -562,12 +563,15 @@ function onMouseMove(event) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
-                artifacts.forEach(element => {
-                    if (element.userData.location == hoverSpot) {
-                        outlinePass.selectedObjects = [element, artifacts[hoverSpot - 1]]
+
+                artifacts.forEach((element, i) => {
+
+                    if (element.userData.id == hoverSpot) {
+                        outlinePass.selectedObjects.push(element)
                     }
                     else {
-                        outlinePass.selectedObjects = [artifacts[hoverSpot - 1]]
+
+                        outlinePass.selectedObjects.splice(i, 1);
                     }
                 })
                 intersects[i].object.material.color.set(0xff0000);
@@ -677,7 +681,7 @@ async function lookAtArtifact(params) {
             await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
         }
     }
-    outlinePass.selectedObjects = infoPoints
+    //   outlinePass.selectedObjects = infoPoints
     backButton.style.display = 'block'
     left.style.display = 'block'
     right.style.display = 'block'
@@ -707,8 +711,8 @@ const animate = () => {
     if (!testing) {
         customFitTo()
     }
-    //  return compose.render(scene, camera) && renderer.render(scene, camera);
-    return renderer.render(scene, camera);
+    return compose.render(scene, camera) && renderer.render(scene, camera);
+    // return renderer.render(scene, camera);
 };
 animate()
 // unhide doc
