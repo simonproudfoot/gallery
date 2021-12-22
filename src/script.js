@@ -12,6 +12,7 @@ import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import positions from './positions.json'
 import gsap from 'gsap';
 import * as dat from 'dat.gui';
+const cameraHeight = 7
 const axios = require('axios').default;
 const loader = new GLTFLoader();
 let testing = false;
@@ -218,20 +219,28 @@ function sideMoves(event) {
     const cur = selectSpot - 1
     if (event.target.id == 'left') {
         artifacts.forEach((element, i) => {
+
             if (element.userData.location == cur) {
                 const prev = i - 1
-                console.log('prev name', artifacts[prev].name)
-                console.log('prev to', artifacts[prev].userData.location)
+                console.log('current name', artifacts[i].name)
+                console.log('current location', artifacts[i].userData.location + 1)
+                console.log('back to', artifacts[prev].userData.location)
                 selectSpot = artifacts[prev].userData.location + 1
             }
+
         });
     }
     if (event.target.id == 'right') {
         artifacts.forEach((element, i) => {
+
             if (element.userData.location == cur) {
                 const next = i + 1
+                console.log('current name', artifacts[i].name)
+                //   console.log('current location', artifacts[i].userData.location + 1)
+                console.log('next to', artifacts[next].name)
                 selectSpot = artifacts[next].userData.location + 1
             }
+
         });
     }
     lookAtArtifact()
@@ -253,10 +262,11 @@ function welcomeMessage() {
 }
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
 const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#000' })
-function makeInfoPoint(location, wallmount) {
+function makeInfoPoint(location, name, wallmount) {
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
     infoPoint.position.copy(positions[location])
     infoPoint.position.y = 10
+    infoPoint.name = name
     if (between(location, 0, 9)) {
         infoPoint.name = 'infoPoint' + location
         if (wallmount) {
@@ -278,13 +288,10 @@ function makeInfoPoint(location, wallmount) {
     if (between(location, 15, 20)) {
         infoPoint.rotation.y = Math.PI / 2
         infoPoint.position.x = -89.380
-
         if (wallmount) {
             infoPoint.position.z -= 13
-
         } else {
             infoPoint.position.z -= 8
-
         }
     }
     infoPoints.push(infoPoint)
@@ -403,10 +410,24 @@ function makeWallMount(location) {
     scene.add(newWallmount)
     return newWallmount
 }
+function dynamicSort(property) {
+    var sortOrder = 1;
+    if (property[0] === "-") {
+        sortOrder = -1;
+        property = property.substr(1);
+    }
+    return function (a, b) {
+        /* next line works with strings and numbers, 
+         * and you may want to customize it to your needs
+         */
+        var result = (a.userData[property] < b.userData[property]) ? -1 : (a.userData[property] > b.userData[property]) ? 1 : 0;
+        return result * sortOrder;
+    }
+}
 console.log(database)
 function loadartifacts(params) {
-    database.sort((a, b) => parseFloat(a.location) - parseFloat(b.location)).forEach(async (element, i) => {
-        // LOAD artifactsf
+    database.forEach(async (element, i) => {
+        // LOAD artifacts
         var location = parseInt(element.location) - 1
         var selected = positions[location]
         if (element.is_model) {
@@ -418,7 +439,6 @@ function loadartifacts(params) {
             let maxAxis = Math.max(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z);
             loadedArtifact.scene.scale.multiplyScalar(10 / maxAxis);
             loadedArtifact.scene.position.copy(selected)
-
             loadedArtifact.scene.position.copy(calcPesistalPosition(loadedArtifact.scene.position, location))
             loadedArtifact.scene.userData.pedistal = true
             loadedArtifact.scene.name = element.artifact_title
@@ -429,20 +449,17 @@ function loadartifacts(params) {
             }
             loadedArtifact.scene.position.y = element.model_position ? element.model_position : 5
             loadedArtifact.scene.rotation.y = element.model_rotate ? element.model_rotate : 0
-
             loadedArtifact.scene.userData.id = location
             loadedArtifact.scene.userData.pedistal = true
             loadedArtifact.scene.userData.index = i
             loadedArtifact.scene.userData.location = location
-
             artifacts.push(loadedArtifact.scene)
             scene.add(loadedArtifact.scene)
-
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
             makeSprite(location, loadedArtifact.scene.position, i)
             makeMenuItem(element.artifact_title, location, location)
-            makeInfoPoint(location)
+            makeInfoPoint(location, 'info-' + location, null)
         }
         // LOAD IMAGES
         else {
@@ -461,7 +478,7 @@ function loadartifacts(params) {
                 makeLight(location, mount.position)
                 makeSprite(location, mount.position, i)
                 makeMenuItem(element.artifact_title, element.location, i)
-                makeInfoPoint(location, selected, true)
+                makeInfoPoint(location, 'info-' + location, true)
                 var imgSize = tex.image.height / tex.image.width
                 var maxHeight = 1.3
                 if (imgSize > maxHeight) {
@@ -475,6 +492,8 @@ function loadartifacts(params) {
         }
         // finished
         if (i == database.length - 1) {
+            artifacts.sort(dynamicSort("location")); // reforder the array for easy location find
+
             start.style.display = 'block'
             loading.style.display = 'none'
             console.log(artifacts)
@@ -497,12 +516,25 @@ renderer.setSize(sizes.width, sizes.height)
 renderer.physicallyCorrectLights = true
 // CLICK ON OBJECTS
 function selectObjectFromMenu() {
+    const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
+  
     if (open) {
         closeMenu()
     }
-    showArrows()
-    selectSpot = event.target.attributes['data-artifact'].value
+
+    if (selectSpot) {
+
+        turnAround()
+        setTimeout(() => {
+            selectSpot = val
+        }, 2000);
+    }
+    else {
+        showArrows()
+    }
+
+
 }
 function onDocumentMouseDown(event) {
     if (!event.target.classList.contains('allowClick')) {
@@ -517,7 +549,6 @@ function onDocumentMouseDown(event) {
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 showArrows()
                 selectSpot = parseInt(intersects[0].object.userData.id + 1)
-
             }
         }
         else if (intersectsInfo.length > 0 && selectSpot) {
@@ -536,9 +567,9 @@ compose.addPass(renderPass);
 compose.addPass(outlinePass);
 var params = {
     edgeStrength: 1,
-    edgeGlow: 4,
+    edgeGlow: 2,
     edgeThickness: 0.5,
-    pulsePeriod: 3,
+    pulsePeriod: 0.2,
 };
 outlinePass.edgeStrength = params.edgeStrength;
 outlinePass.edgeGlow = params.edgeGlow;
@@ -563,14 +594,11 @@ function onMouseMove(event) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
-
                 artifacts.forEach((element, i) => {
-
                     if (element.userData.id == hoverSpot) {
                         outlinePass.selectedObjects.push(element)
                     }
                     else {
-
                         outlinePass.selectedObjects.splice(i, 1);
                     }
                 })
@@ -612,7 +640,7 @@ if (!testing) {
     cameraControls.saveState();
 } else {
     cameraControls.target.set(0.5, 1, .5)
-    //cameraControls.update()
+
 }
 // inital view
 camera.lookAt(new THREE.Vector3(1, 0, 0))
@@ -623,7 +651,9 @@ const cameraStand = new THREE.Mesh(
 );
 scene.add(cameraStand);
 cameraStand.geometry.computeBoundingBox();
-cameraStand.visible = true
+if (testing) {
+    cameraStand.visible = true
+}
 const meshBBSize = cameraStand.geometry.boundingBox.getSize(new THREE.Vector3());
 const meshBBWidth = meshBBSize.x;
 const meshBBHeight = meshBBSize.y;
@@ -633,16 +663,16 @@ function customFitTo() {
     ///alert(distanceToFit)
     cameraControls.moveTo(
         cameraStand.position.x,
-        cameraStand.position.y,
+        cameraHeight,
         cameraStand.position.z + distanceToFit,
         true
     );
 }
 if (!testing) {
-    cameraControls.setPosition(0, 0, -230)
+    cameraControls.setPosition(0, cameraHeight, -230)
 }
 async function startTour() {
-    await cameraControls.setPosition(0, 0, 0, true);
+    await cameraControls.setPosition(0, cameraHeight, 0, true);
     intro = false
     ready = true
     cameraControls.enabled = true
@@ -652,49 +682,67 @@ async function startTour() {
 var nextPos = {}
 async function lookAtArtifact(params) {
     if (selectSpot) {
+        outlinePass.selectedObjects = []
         const location = selectSpot - 1
         // console.log(location)
-        artifacts.forEach(element => {
-            //console.log('obj',element.userData.location)
+        artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
                 nextPos.x = element.position.x
-                nextPos.y = 2
                 nextPos.z = element.position.z
             }
         })
-    }
-    if (between(selectSpot, 0, 9)) {
-        cameraStand.position.set(nextPos.x - 30, nextPos.y, nextPos.z)
-        if (!testing) {
-            await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
+        if (between(selectSpot, 0, 9)) {
+            cameraStand.position.set(nextPos.x - 30, cameraHeight, nextPos.z)
+            if (!testing) {
+                await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
+            }
+        }
+        if (between(selectSpot, 9, 16)) {
+            cameraStand.position.set(nextPos.x, cameraHeight, nextPos.z - 30)
+            if (!testing) {
+                await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
+            }
+        }
+        if (between(selectSpot, 15, 20)) {
+            cameraStand.position.set(nextPos.x + 30, cameraHeight, nextPos.z)
+            if (!testing) {
+                await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
+            }
         }
     }
-    if (between(selectSpot, 9, 16)) {
-        cameraStand.position.set(nextPos.x, nextPos.y, nextPos.z - 30)
-        if (!testing) {
-            await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
-        }
-    }
-    if (between(selectSpot, 15, 20)) {
-        cameraStand.position.set(nextPos.x + 30, nextPos.y, nextPos.z)
-        if (!testing) {
-            await cameraControls.setLookAt(cameraStand.position.x, 2, cameraStand.position.z, nextPos.x, nextPos.y, nextPos.z, true)
-        }
-    }
-    //   outlinePass.selectedObjects = infoPoints
-    backButton.style.display = 'block'
-    left.style.display = 'block'
-    right.style.display = 'block'
-    // }
 }
 async function turnAround() {
     hideArrows()
     if (!testing) {
-        await cameraControls.setLookAt(cameraStand.position.x, cameraStand.position.y, cameraStand.position.z, 0, 2, 0, true)
+        cameraControls.moveTo(
+            cameraStand.position.x,
+            cameraHeight,
+            cameraStand.position.z,
+            true
+        );
     }
     selectSpot = null
 }
+function flashInfo(i) {
+    var start = new THREE.Color(0x000000);
+    var value = new THREE.Color(0xff0000);
+    gsap.fromTo(i.material.color, {
+        r: start.r,
+        g: start.g,
+        b: start.b,
+    }, {
+        r: value.r,
+        g: value.g,
+        b: value.b,
+        yoyo: true,
+        duration: 1,
+        repeat: -1
+    });
+}
 const animate = () => {
+    if (!testing) {
+        customFitTo()
+    }
     // INTRO - WALK INTO ROOM
     if (intro && started) {
         startTour()
@@ -708,9 +756,7 @@ const animate = () => {
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
-    if (!testing) {
-        customFitTo()
-    }
+
     return compose.render(scene, camera) && renderer.render(scene, camera);
     // return renderer.render(scene, camera);
 };
@@ -731,7 +777,12 @@ icons.forEach(icon => {
         }
     });
 });
+
 function closeMenu() {
+    
+
+
+    
     gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
     icons.forEach(icon => {
         icon.classList.remove("open");
@@ -771,8 +822,20 @@ function openInfoWindow() {
     infoWindowOpen = true
 }
 function showArrows() {
-    gsap.to('#left', { x: 0, opacity: 1, duration: 1 })
-    gsap.to('#right', { x: 0, opacity: 1, duration: 1 })
+    backButton.style.display = 'block'
+
+    // if (selectSpot > 0) {
+    gsap.to('#left', { x: 0, opacity: 1, duration: 1, display: 'block' })
+    //} else {
+    //left.style.display = 'none'
+    //}
+    //if (selectSpot <= artifacts.length) {
+    gsap.to('#right', { x: 0, opacity: 1, duration: 1, display: 'block' })
+    //} else {
+    //right.style.display = 'none'
+    //}
+    // alert(selectSpot)
+
     gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
 }
 function hideArrows() {
@@ -791,8 +854,6 @@ function spriteOff() {
     sprites.forEach(sprite => {
         let distance = cameraStand.position.distanceTo(sprite.position)
         if (distance < 30) {
-            // console.log(cameraStand.position.distanceTo(sprite.position))
-            // console.log('id',sprite.userData.id)
             sprite.visible = false
         }
         else {
@@ -800,7 +861,5 @@ function spriteOff() {
             sprite.position.y = + distance / 15
             sprite.visible = true
         }
-        //}
-        //   console.log(artifact.position)
     });
 }
