@@ -1,5 +1,5 @@
 @import "~bootstrap";
-@import 'bootstrap/dist/css/bootstrap-grid.min.css';
+@import "bootstrap/dist/css/bootstrap-grid.min.css";
 @import "./colours";
 @import "./screens";
 // font-family: "Gotham", sans-serif;
@@ -31,16 +31,15 @@
   font-style: normal;
 }
 
-
-p{
+p {
   font-family: "gothamthin";
 }
 
-#wpadminbar{
+#wpadminbar {
   background-color: $yellow !important;
   top: unset !important;
   bottom: 0 !important;
-  *{
+  * {
     color: $black !important;
   }
 }
@@ -104,7 +103,7 @@ button {
   padding: 0.8em 1.5em;
   font-family: "gothammedium", sans-serif !important;
   &:hover {
-   // background-color: #fff !important;
+    // background-color: #fff !important;
   }
 }
 #goback {
@@ -124,10 +123,9 @@ button {
   top: 50%;
   transform: translateY(-50%);
   z-index: 9999;
-  &:hover{
+  &:hover {
     cursor: pointer;
   }
-  
 }
 
 #left {
@@ -135,4 +133,15 @@ button {
 }
 #right {
   right: 0;
+}
+
+.howto {
+  background-color: #fff;
+  padding: 4rem;
+  height: 100%;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 50%;
+  z-index: 9999;
 }

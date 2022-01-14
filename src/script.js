@@ -12,7 +12,13 @@ import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import positions from './positions.json'
 import gsap from 'gsap';
 import * as dat from 'dat.gui';
+let waiting;
+let stepOneDone = false
+let stepTwoDone = false
+let waitForStep2 = true
+let artifacstLoaded = false
 const cameraHeight = 7
+const roomCenter = { x: -30.000, y: 10.000, z: 0 }
 const axios = require('axios').default;
 const loader = new GLTFLoader();
 let testing = false;
@@ -71,6 +77,15 @@ var x = 10
 var i = 1
 let gui = null
 let showSettings = false
+
+
+// LISTENERS
+document.getElementById("enterGallery").addEventListener("click", enterGallery);
+
+
+
+
+
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'settings') {
     gui = new dat.GUI();
     showSettings = true
@@ -162,38 +177,34 @@ const ambientLight = new THREE.HemisphereLight(
     0xe0d3af, // dim ground color
     0.8, // intensity
 );
+let guttmanPosition;
 scene.add(ambientLight)
 // Load a glTF resource
-var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './gallery_extended.gltf' : themeDir + '/dist/gallery_extended.gltf'
-loader.load(galleryModelUrl, function (gltf) {
-    gltf.scene.scale.set(0.05, 0.05, 0.05)
-    // remove from model later 
-    gltf.scene.getObjectByName('Cube011').visible = false
-    gltf.scene.getObjectByName('Cube011_1').visible = false
-    gltf.scene.getObjectByName('Cube012').visible = false
-    gltf.scene.getObjectByName('Cube012_1').visible = false
-    gltf.scene.getObjectByName('Cube014').visible = false
-    gltf.scene.getObjectByName('Cube014_1').visible = false
-    gltf.scene.getObjectByName('Cube015').visible = false
-    gltf.scene.getObjectByName('Cube015_1').visible = false
+var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './NPHT.gltf' : themeDir + '/dist/NPHT.gltf'
+loader.load(galleryModelUrl, (gltf) => {
+    gltf.scene.scale.set(0.0005, 0.0005, 0.0005)
+    gltf.scene.name = 'gallerySpace'
+    gltf.scene.position.y = -6
     scene.add(gltf.scene);
-    gltf.scene.traverse(n => {
-        if (n.isMesh) {
-            n.castShadow = true;
-            n.receiveShadow = true;
-            if (n.material.map) n.material.map.anisotropy = 16;
-        }
-    });
+    guttmanPosition = gltf.scene.getObjectByName('Dr_Guttman_Bust').position
+
+
 },
-    // called while loading is progressing
-    function (xhr) {
-        //((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    // called when loading has errors
-    function (error) {
-        console.log('An error happened' + error);
-    }
+
+
 );
+const guttmanLight = new THREE.RectAreaLight(0xEBFAFF, 7, 300, 10)
+guttmanLight.name = 'guttmanLight'
+guttmanLight.position.set(-20, 7, -200)
+guttmanLight.rotation.y = Math.PI * 7
+scene.add(guttmanLight)
+// light above guttman
+
+
+
+
+
+
 // Create bounding box for pedistal items to fit into
 const boundingBoxGeom = new THREE.Mesh(
     new THREE.BoxGeometry(5, 5, 5),
@@ -255,11 +266,7 @@ function closeInfoWindow() {
         showArrows()
     }
 }
-//welcomeMessage
-function welcomeMessage() {
-    sprites.forEach(x => x.visible = true)
-    document.getElementById('menuButton').style.display = 'block'
-}
+
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
 const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#000' })
 function makeInfoPoint(location, name, wallmount) {
@@ -357,7 +364,7 @@ function makeMenuItem(title, position, i) {
     newLI.classList.add('selectTargets')
     newLI.setAttribute("id", 'artifact-' + position);
     newLI.setAttribute("data-artifact", +position);
-    newLI.appendChild(document.createTextNode(title + '-' + i));
+    newLI.appendChild(document.createTextNode(title));
     modList.appendChild(newLI);
     //  newLI.style.color = colors[i]
     newSprite.style.borderColor = colors[i]
@@ -424,7 +431,7 @@ function dynamicSort(property) {
         return result * sortOrder;
     }
 }
-console.log(database)
+
 function loadartifacts(params) {
     database.forEach(async (element, i) => {
         // LOAD artifacts
@@ -487,6 +494,7 @@ function loadartifacts(params) {
                 }
                 mount.scale.set(1.0, imgSize, 1.0);
                 artifacts.push(mount)
+
                 //mount.visible = false
             });
         }
@@ -494,9 +502,9 @@ function loadartifacts(params) {
         if (i == database.length - 1) {
             artifacts.sort(dynamicSort("location")); // reforder the array for easy location find
 
-            start.style.display = 'block'
-            loading.style.display = 'none'
-            console.log(artifacts)
+            artifacstLoaded = true
+            //   lCount = true
+
         }
     })
 }
@@ -518,20 +526,20 @@ renderer.physicallyCorrectLights = true
 function selectObjectFromMenu() {
     const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
-  
+    showArrows()
     if (open) {
         closeMenu()
     }
 
     if (selectSpot) {
-
         turnAround()
         setTimeout(() => {
             selectSpot = val
-        }, 2000);
+        }, 1000);
     }
     else {
-        showArrows()
+        selectSpot = val
+
     }
 
 
@@ -586,10 +594,7 @@ function onMouseMove(event) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         var intersects = raycaster.intersectObjects(sprites);
-        // var intersectsA = raycaster.intersectObjects(infoPoints);
-        // if (intersectsA.length > 0) {
-        //    alert('ds')
-        // } 
+        // var intersectsA = raycaster.intersectObjects(infoPoints)
         if (intersects.length > 0) {
             document.body.style.cursor = "pointer";
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
@@ -643,13 +648,15 @@ if (!testing) {
 
 }
 // inital view
-camera.lookAt(new THREE.Vector3(1, 0, 0))
+camera.lookAt(new THREE.Vector3(roomCenter.x, roomCenter.y, roomCenter.z))
 // CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true })
 );
+cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(cameraStand);
+
 cameraStand.geometry.computeBoundingBox();
 if (testing) {
     cameraStand.visible = true
@@ -669,22 +676,30 @@ function customFitTo() {
     );
 }
 if (!testing) {
-    cameraControls.setPosition(0, cameraHeight, -230)
+    cameraControls.setPosition(0, cameraHeight, -210)
 }
 async function startTour() {
-    await cameraControls.setPosition(0, cameraHeight, 0, true);
-    intro = false
-    ready = true
-    cameraControls.enabled = true
-    welcomeMessage()
+    // setTimeout(() => {
+
+    //cameraControls.setTarget(cameraStand.position.x, cameraHeight, cameraStand.position.z, true);
+    cameraControls.moveTo(cameraStand.position.x, cameraHeight, 20, true);
+
+    // cameraControls.forward(500, true)
+    cameraControls.rotateTo(0, - Math.PI / 2, true)
+    // intro = false
+    // ready = true
+    // cameraControls.enabled = true
+
+
     return true
+    //  },10000);
+
 }
 var nextPos = {}
-async function lookAtArtifact(params) {
+async function lookAtArtifact(params, firstStep) {
     if (selectSpot) {
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
-        // console.log(location)
         artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
                 nextPos.x = element.position.x
@@ -709,19 +724,65 @@ async function lookAtArtifact(params) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
         }
+    } else if (firstStep) {
+        if (!stepOneDone) {
+            cameraStand.position.set(cameraStand.position.x, cameraHeight, 20)
+            stepOneDone = true
+            //       stepTwoDone = true
+            gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
+        }
+
+    }
+    if (waiting && !selectSpot) {
+
+        await cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
+        await cameraControls.rotateTo( Math.PI / 2, Math.PI / 4, true );
+        waiting=false
+
     }
 }
+
+function enterGallery() {
+
+    gsap.to('.howto', {
+        display: 'none', autoAlpha: 0, x: 100, duration: 0.5
+    })
+
+
+
+    gsap.to(scene.getObjectByName('Glass_Door_Right').position, {
+        x: -94000, delay: 1, duration: 1,
+    })
+
+    gsap.to(scene.getObjectByName('Glass_Door_Left').position, {
+        x: -36000, delay: 1, duration: 1, onComplete: async () => {
+            await cameraControls.dollyTo(100, true);
+
+            selectSpot = 1
+            showArrows()
+
+        }
+    })
+}
+
+
+
+
 async function turnAround() {
+    cameraControls.enabled = true
     hideArrows()
     if (!testing) {
-        cameraControls.moveTo(
-            cameraStand.position.x,
-            cameraHeight,
-            cameraStand.position.z,
-            true
-        );
+
+        // await cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, roomCenter.x, roomCenter.y, roomCenter.z, true)
+        // cameraControls.moveTo(
+        //     cameraStand.position.x,
+        //     cameraHeight,
+        //     cameraStand.position.z,
+        //     true
+        // );
     }
     selectSpot = null
+    waiting = true
 }
 function flashInfo(i) {
     var start = new THREE.Color(0x000000);
@@ -739,13 +800,20 @@ function flashInfo(i) {
         repeat: -1
     });
 }
+
+let doneLoading = false
+
+
 const animate = () => {
     if (!testing) {
         customFitTo()
     }
     // INTRO - WALK INTO ROOM
-    if (intro && started) {
-        startTour()
+    if (intro && started && doneLoading) {
+        //  selectSpot=1
+        lookAtArtifact(false, true)
+        //cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
+
     } else if (selectSpot) {
         lookAtArtifact()
     }
@@ -757,7 +825,19 @@ const animate = () => {
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
 
+
+    // check model 
+    if (scene.getObjectByName('gallerySpace') && artifacstLoaded && !doneLoading) {
+        doneLoading = true
+        start.style.display = 'block'
+        loading.style.display = 'none'
+    }
+
     return compose.render(scene, camera) && renderer.render(scene, camera);
+
+
+
+
     // return renderer.render(scene, camera);
 };
 animate()
@@ -779,10 +859,8 @@ icons.forEach(icon => {
 });
 
 function closeMenu() {
-    
 
 
-    
     gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
     icons.forEach(icon => {
         icon.classList.remove("open");
@@ -837,6 +915,7 @@ function showArrows() {
     // alert(selectSpot)
 
     gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
+    cameraControls.enabled = false
 }
 function hideArrows() {
     gsap.to('#left', { x: -100, opacity: 0, duration: 1 })
@@ -845,6 +924,13 @@ function hideArrows() {
 }
 document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
 window.addEventListener('resize', onWindowResize, false);
+
+
+
+
+
+
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();

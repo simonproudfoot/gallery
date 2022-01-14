@@ -6,6 +6,13 @@
         <span></span>
     </div>
 </div>
+
+<div class="howto welcome" style="display: none;">
+    <p class="mb-4 h1">How to</p>
+    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,</p>
+
+    <button id="enterGallery">GOT IT</button>
+</div>
 <div id="menu" class="menu" style="display: none;">
     <div class="menu__inner">
         <div class="container">
@@ -67,7 +74,7 @@
     </div>
     <div id="infoWindow__footer" class="infoWindow__footer">
         <div class="infoWindow__footer__next blackBack py-4 px-5"">
-            <p class="text-muted mb-0">Jump to next story</p>
+            <p class=" text-muted mb-0">Jump to next story</p>
             <h4 id="nextStory" class="text-white"></h4>
             <span class="ring"></span>
         </div>
