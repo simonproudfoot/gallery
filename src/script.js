@@ -77,15 +77,12 @@ var x = 10
 var i = 1
 let gui = null
 let showSettings = false
-
-
 // LISTENERS
 document.getElementById("enterGallery").addEventListener("click", enterGallery);
-
-
-
-
-
+document.getElementById("infoButton").addEventListener("click", openHowTo);
+function openHowTo() {
+    gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
+}
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'settings') {
     gui = new dat.GUI();
     showSettings = true
@@ -98,12 +95,9 @@ if (window.location.hash.substr(1).length && window.location.hash.substr(1) == '
     document.getElementById('controls').style.display = 'none'
     document.getElementById('testmode').style.display = 'block'
     document.getElementById('welcomeScreen').style.display = 'none';
+
 }
-// remove positons button
-// if (!testing) {
-//     pos.style.display = 'none'
-// }
-// FLOOR
+
 const colorTexture = textureLoader.load(woodenFloor)
 const bumpmap = textureLoader.load(woodenFloorBump)
 colorTexture.wrapS = THREE.RepeatWrapping
@@ -134,44 +128,7 @@ if (!testing) {
     ceiling.name = 'ceiling'
     scene.add(ceiling);
 }
-// CREATE OBJECTS ON LONG
-// positions.forEach(element => {
-//     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
-//     // if (i <= 5 || i > 10 && i < 16) {
-//     //     var newArtifact = new THREE.Mesh(wallMountedGeometry, material1);
-//     //     newArtifact.name = 'Wallmount-' + i
-//     //     newArtifact.position.copy(element)
-//     //     newArtifact.userData.pedistal = false
-//     //     infoPoint.position.copy(element)
-//     //     infoPoint.position.z = newArtifact.position.z + 13
-//     //     infoPoint.rotation.y = Math.PI / 2
-//     // }
-//     // else {
-//            // newArtifact.name = 'position-' + i +'-'+ element.info
-//         // newArtifact.position.y = -2.5 // touch floor
-//         // newArtifact.userData.pedistal = true
-//     //     infoPoint.position.copy(element)
-//     //     infoPoint.position.x = +3
-//     //     infoPoint.position.z = newArtifact.position.z + 8
-//     //     infoPoint.position.y = 2
-//     //     infoPoint.rotation.y = Math.PI / 2
-//     // //}
-//     // infoPoint.position.y = 10
-//     // if (i > 10) {
-//     //     newArtifact.rotation.y = Math.PI
-//     //     infoPoint.position.x = 0
-//     //     infoPoint.position.x = -90
-//     // }
-//     // else {
-//     //     infoPoint.position.x = +30
-//     // }
-//     // makeSprite(newArtifact.position.copy(element), newArtifact.name, newArtifact.position)
-//    // infoPoints.push(infoPoint)
-//    // artifacts.push(newArtifact)
-//    // scene.add(newArtifact)
-//    // scene.add(infoPoint)
-//     i++
-// });
+
 const ambientLight = new THREE.HemisphereLight(
     0xFFFFFF, // bright sky color
     0xe0d3af, // dim ground color
@@ -180,35 +137,59 @@ const ambientLight = new THREE.HemisphereLight(
 let guttmanPosition;
 scene.add(ambientLight)
 // Load a glTF resource
-var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './NPHT.gltf' : themeDir + '/dist/NPHT.gltf'
-loader.load(galleryModelUrl, (gltf) => {
-    gltf.scene.scale.set(0.0005, 0.0005, 0.0005)
-    gltf.scene.name = 'gallerySpace'
-    gltf.scene.position.y = -6
-    scene.add(gltf.scene);
-    guttmanPosition = gltf.scene.getObjectByName('Dr_Guttman_Bust').position
+
+if (!testing) {
+    var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './NPHT.gltf' : themeDir + '/dist/NPHT.gltf'
+    loader.load(galleryModelUrl, (gltf) => {
+        gltf.scene.scale.set(0.0005, 0.0005, 0.0005)
+        gltf.scene.name = 'gallerySpace'
+        gltf.scene.position.y = -6
+        scene.add(gltf.scene);
+        guttmanPosition = gltf.scene.getObjectByName('Dr_Guttman_Bust').position
+    },
+    );
+}
 
 
-},
+
+// load text 
+window.onload = function () {
+    var canvas = document.getElementById("textCanvas");
+    var context = canvas.getContext("2d");
+    context.font = "200px gotham";
+    var ele = document.getElementById("testText");
+
+    if (ele.textContent) {
+        // for firefox
+        context.fillText(ele.textContent, 10, 90);
+      //  context.fillText(ele1.textContent, 10, 110);
+    } else {
+        // for other browser
+        context.fillText(ele.innerText, 10, 90);
+    //    context.fillText(ele1.innerText, 10, 110);
+    }
+
+    var img = document.getElementById("exportedImage");
+    img.src = canvas.toDataURL('image/png');
+
+    console.log(img.src)
+}
 
 
-);
+
+
+
+
 const guttmanLight = new THREE.RectAreaLight(0xEBFAFF, 7, 300, 10)
 guttmanLight.name = 'guttmanLight'
 guttmanLight.position.set(-20, 7, -200)
 guttmanLight.rotation.y = Math.PI * 7
 scene.add(guttmanLight)
 // light above guttman
-
-
-
-
-
-
 // Create bounding box for pedistal items to fit into
 const boundingBoxGeom = new THREE.Mesh(
     new THREE.BoxGeometry(5, 5, 5),
-    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true })
+    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, visible: false })
 );
 boundingBoxGeom.visible = false
 scene.add(boundingBoxGeom);
@@ -230,7 +211,6 @@ function sideMoves(event) {
     const cur = selectSpot - 1
     if (event.target.id == 'left') {
         artifacts.forEach((element, i) => {
-
             if (element.userData.location == cur) {
                 const prev = i - 1
                 console.log('current name', artifacts[i].name)
@@ -238,12 +218,10 @@ function sideMoves(event) {
                 console.log('back to', artifacts[prev].userData.location)
                 selectSpot = artifacts[prev].userData.location + 1
             }
-
         });
     }
     if (event.target.id == 'right') {
         artifacts.forEach((element, i) => {
-
             if (element.userData.location == cur) {
                 const next = i + 1
                 console.log('current name', artifacts[i].name)
@@ -251,7 +229,6 @@ function sideMoves(event) {
                 console.log('next to', artifacts[next].name)
                 selectSpot = artifacts[next].userData.location + 1
             }
-
         });
     }
     lookAtArtifact()
@@ -266,7 +243,6 @@ function closeInfoWindow() {
         showArrows()
     }
 }
-
 const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
 const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#000' })
 function makeInfoPoint(location, name, wallmount) {
@@ -431,7 +407,6 @@ function dynamicSort(property) {
         return result * sortOrder;
     }
 }
-
 function loadartifacts(params) {
     database.forEach(async (element, i) => {
         // LOAD artifacts
@@ -494,17 +469,14 @@ function loadartifacts(params) {
                 }
                 mount.scale.set(1.0, imgSize, 1.0);
                 artifacts.push(mount)
-
                 //mount.visible = false
             });
         }
         // finished
         if (i == database.length - 1) {
             artifacts.sort(dynamicSort("location")); // reforder the array for easy location find
-
             artifacstLoaded = true
             //   lCount = true
-
         }
     })
 }
@@ -530,7 +502,6 @@ function selectObjectFromMenu() {
     if (open) {
         closeMenu()
     }
-
     if (selectSpot) {
         turnAround()
         setTimeout(() => {
@@ -539,10 +510,7 @@ function selectObjectFromMenu() {
     }
     else {
         selectSpot = val
-
     }
-
-
 }
 function onDocumentMouseDown(event) {
     if (!event.target.classList.contains('allowClick')) {
@@ -617,10 +585,14 @@ function onMouseMove(event) {
 }
 // Which camera should we use?
 const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) : new CameraControls(camera, renderer.domElement)
+
 // listeners
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
-document.getElementById("start").addEventListener("click", beginTour);
+document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+
+
 function beginTour(params) {
     enterDoor()
     setTimeout(() => {
@@ -645,18 +617,16 @@ if (!testing) {
     cameraControls.saveState();
 } else {
     cameraControls.target.set(0.5, 1, .5)
-
 }
 // inital view
 camera.lookAt(new THREE.Vector3(roomCenter.x, roomCenter.y, roomCenter.z))
 // CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true })
+    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: false })
 );
 cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(cameraStand);
-
 cameraStand.geometry.computeBoundingBox();
 if (testing) {
     cameraStand.visible = true
@@ -680,20 +650,15 @@ if (!testing) {
 }
 async function startTour() {
     // setTimeout(() => {
-
     //cameraControls.setTarget(cameraStand.position.x, cameraHeight, cameraStand.position.z, true);
     cameraControls.moveTo(cameraStand.position.x, cameraHeight, 20, true);
-
     // cameraControls.forward(500, true)
     cameraControls.rotateTo(0, - Math.PI / 2, true)
     // intro = false
     // ready = true
     // cameraControls.enabled = true
-
-
     return true
     //  },10000);
-
 }
 var nextPos = {}
 async function lookAtArtifact(params, firstStep) {
@@ -728,51 +693,50 @@ async function lookAtArtifact(params, firstStep) {
         if (!stepOneDone) {
             cameraStand.position.set(cameraStand.position.x, cameraHeight, 20)
             stepOneDone = true
-            //       stepTwoDone = true
             gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
         }
-
     }
     if (waiting && !selectSpot) {
-
-        await cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
-        await cameraControls.rotateTo( Math.PI / 2, Math.PI / 4, true );
-        waiting=false
-
+        cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
+        //cameraControls.setLookAt(, cameraHeight, 0, true)
+        await cameraControls.rotateTo(Math.PI / 2, Math.PI / 4, true);
+        waiting = false
     }
 }
-
-function enterGallery() {
-
+document.getElementById("closeHowTo").addEventListener("click", closeHowTo);
+function closeHowTo() {
     gsap.to('.howto', {
         display: 'none', autoAlpha: 0, x: 100, duration: 0.5
     })
-
-
+}
+function enterGallery() {
+    gsap.to('.howto', {
+        display: 'none', autoAlpha: 0, x: 100, duration: 0.5
+    })
+    gsap.to('#menuButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
+    gsap.to('#infoButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
 
     gsap.to(scene.getObjectByName('Glass_Door_Right').position, {
         x: -94000, delay: 1, duration: 1,
     })
-
     gsap.to(scene.getObjectByName('Glass_Door_Left').position, {
         x: -36000, delay: 1, duration: 1, onComplete: async () => {
             await cameraControls.dollyTo(100, true);
-
             selectSpot = 1
             showArrows()
+            stepTwoDone = true
+
+            document.getElementById('enterGallery').style.display = 'none'
+            document.getElementById('closeHowTo').style.display = 'block'
 
         }
     })
 }
-
-
-
 
 async function turnAround() {
     cameraControls.enabled = true
     hideArrows()
     if (!testing) {
-
         // await cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, roomCenter.x, roomCenter.y, roomCenter.z, true)
         // cameraControls.moveTo(
         //     cameraStand.position.x,
@@ -800,10 +764,7 @@ function flashInfo(i) {
         repeat: -1
     });
 }
-
 let doneLoading = false
-
-
 const animate = () => {
     if (!testing) {
         customFitTo()
@@ -813,7 +774,6 @@ const animate = () => {
         //  selectSpot=1
         lookAtArtifact(false, true)
         //cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
-
     } else if (selectSpot) {
         lookAtArtifact()
     }
@@ -824,20 +784,13 @@ const animate = () => {
     const elapsed = clock.getElapsedTime();
     const updated = cameraControls.update(delta);
     requestAnimationFrame(animate);
-
-
     // check model 
     if (scene.getObjectByName('gallerySpace') && artifacstLoaded && !doneLoading) {
         doneLoading = true
         start.style.display = 'block'
         loading.style.display = 'none'
     }
-
     return compose.render(scene, camera) && renderer.render(scene, camera);
-
-
-
-
     // return renderer.render(scene, camera);
 };
 animate()
@@ -857,10 +810,7 @@ icons.forEach(icon => {
         }
     });
 });
-
 function closeMenu() {
-
-
     gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
     icons.forEach(icon => {
         icon.classList.remove("open");
@@ -901,7 +851,6 @@ function openInfoWindow() {
 }
 function showArrows() {
     backButton.style.display = 'block'
-
     // if (selectSpot > 0) {
     gsap.to('#left', { x: 0, opacity: 1, duration: 1, display: 'block' })
     //} else {
@@ -913,7 +862,6 @@ function showArrows() {
     //right.style.display = 'none'
     //}
     // alert(selectSpot)
-
     gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
     cameraControls.enabled = false
 }
@@ -924,13 +872,6 @@ function hideArrows() {
 }
 document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
 window.addEventListener('resize', onWindowResize, false);
-
-
-
-
-
-
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();

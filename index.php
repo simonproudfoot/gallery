@@ -1,17 +1,29 @@
 <?php get_template_part('/includes/header'); ?>
-<div id="menuButton" class="nav-icon-wrapper">
+
+<div id="testText" style="border: solid 1px gray; padding: 5px;">
+first line
+</div>
+
+<canvas id="textCanvas" width="200" height="200" style="border: solid 1px gray;">
+<img id="exportedImage" width="200" height="200" src="#" />
+<div id="menuButton" class="nav-icon-wrapper" style="opacity: 0;">
     <div class="icon nav-icon">
         <span></span>
         <span></span>
         <span></span>
     </div>
 </div>
-
+<div id="infoButton" class="nav-icon-wrapper infoButton" style="opacity: 0;">
+    <div class="icon nav-icon">
+        <img class="infoButton" src="<?php bloginfo('template_directory'); ?>/src/images/info.svg" width="300" alt="How to">
+    </div>
+</div>
 <div class="howto welcome" style="display: none;">
     <p class="mb-4 h1">How to</p>
     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,</p>
-
     <button id="enterGallery">GOT IT</button>
+    <button id="closeHowTo" style="display: none;">GOT IT</button>
+    
 </div>
 <div id="menu" class="menu" style="display: none;">
     <div class="menu__inner">

@@ -145,3 +145,16 @@ button {
   width: 50%;
   z-index: 9999;
 }
+
+
+.infoButton{
+  position: fixed;
+  top: 0;
+  left: 20px;
+  width: 45px;
+  height: 45px;
+  display: none;
+  z-index: 99999;
+}
+
+
