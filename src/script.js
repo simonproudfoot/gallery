@@ -625,18 +625,25 @@ Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
     const plane = new THREE.Mesh(geometry, material);
 
     if (i == 0) {
-        plane.position.x = 29
-        plane.rotation.y = -Math.PI / 2
-        //scene.add(plane);
-    }
-
-    if (i == 1) {
+        plane.position.z = -100
         plane.position.x = 29
         plane.rotation.y = -Math.PI / 2
         scene.add(plane);
     }
 
+    if (i == 1) {
+        plane.position.x = 29
+        plane.position.z = 100
+        plane.rotation.y = -Math.PI / 2
+        scene.add(plane);
+    }
 
+    if (i == 2) {
+        plane.position.x = 0
+        plane.position.z = 213
+        plane.rotation.y = Math.PI
+        scene.add(plane);
+    }
 
 })
 
