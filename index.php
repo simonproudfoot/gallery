@@ -1,5 +1,4 @@
 <?php get_template_part('/includes/header'); ?>
-
 <div class="zoneTitles">
     <h1>Zone 1</h1>
     <canvas></canvas>
@@ -16,7 +15,7 @@
 
 <div class="zoneTitles">
     <h1>
-        Zone longer name
+        Zone longer name, so big!!
     </h1>
     <canvas></canvas>
     <img src="#" />
@@ -38,7 +37,7 @@
     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,</p>
     <button id="enterGallery">GOT IT</button>
     <button id="closeHowTo" style="display: none;">GOT IT</button>
-    
+
 </div>
 <div id="menu" class="menu" style="display: none;">
     <div class="menu__inner">

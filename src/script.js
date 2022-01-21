@@ -595,24 +595,23 @@ start.addEventListener("click", beginTour);
 // create text labels
 Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
     var ele = zone.children[0]
-    // var width = window.getComputedStyle(ele, null)
     var canvas = zone.children[1]
-    var context = canvas.getContext("2d", { alpha: false });
-    context.font = "80px gotham";
-    context.outlinePass =
-        context.fillStyle = "#fff";
-    //  console.log('cnte', context)
 
-    // console.log(width)
+    canvas.width = ele.clientWidth * 2
+    canvas.height = ele.clientHeight * 2
 
+    var context = canvas.getContext("2d");
+    context.font = "50px gotham";
+
+    context.fillStyle = "#000";
 
     if (ele.textContent) {
         // for firefox
-        context.fillText(ele.textContent, 10, 90);
+        context.fillText(ele.textContent, 0, canvas.height / 2);
         // context.fillText(ele1.textContent, 10, 110);
     } else {
         // for other browser
-        context.fillText(ele.innerText, 10, 90);
+        context.fillText(ele.innerText, 0, canvas.height);
         // context.fillText(ele1.innerText, 10, 110);
     }
 
@@ -620,30 +619,43 @@ Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
     //onsole.log(canvas.toDataURL('image/png'))
     img.src = canvas.toDataURL('image/png');
     const title = textureLoader.load(img.src)
-    const geometry = new THREE.PlaneGeometry(50, 50);
-    const material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide, map: title });
+    const geometry = new THREE.PlaneGeometry(canvas.width/7 , canvas.height /7);
+    const material = new THREE.MeshBasicMaterial({ map: title, alphaTest: 0.5 });
+    console.log(material)
     const plane = new THREE.Mesh(geometry, material);
 
     if (i == 0) {
         plane.position.z = -100
         plane.position.x = 29
         plane.rotation.y = -Math.PI / 2
-        scene.add(plane);
+   
     }
 
     if (i == 1) {
         plane.position.x = 29
         plane.position.z = 100
         plane.rotation.y = -Math.PI / 2
-        scene.add(plane);
+
     }
 
     if (i == 2) {
         plane.position.x = 0
         plane.position.z = 213
         plane.rotation.y = Math.PI
-        scene.add(plane);
+       
     }
+
+    if (i == 3) {
+        plane.position.x = 0
+        plane.position.z = 213
+     //   plane.rotation.y = Math.PI
+       
+    }
+
+   
+   
+
+    scene.add(plane);
 
 })
 

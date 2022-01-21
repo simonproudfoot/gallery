@@ -58,7 +58,7 @@ h1 {
   font-weight: bold;
 }
 
-canvas {
+.webgl {
   display: block;
   /* fix necessary to remove space at bottom of canvas */
   height: 100vh;
@@ -161,4 +161,12 @@ button {
   z-index: -1;
   position: fixed;
   pointer-events: none;
+  h1 {
+    width: auto;
+    //height: auto;
+    display: inline-block;
+  }
+  canvas {
+    background-color: red;
+  }
 }
