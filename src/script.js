@@ -95,9 +95,7 @@ if (window.location.hash.substr(1).length && window.location.hash.substr(1) == '
     document.getElementById('controls').style.display = 'none'
     document.getElementById('testmode').style.display = 'block'
     document.getElementById('welcomeScreen').style.display = 'none';
-
 }
-
 const colorTexture = textureLoader.load(woodenFloor)
 const bumpmap = textureLoader.load(woodenFloorBump)
 colorTexture.wrapS = THREE.RepeatWrapping
@@ -128,7 +126,6 @@ if (!testing) {
     ceiling.name = 'ceiling'
     scene.add(ceiling);
 }
-
 const ambientLight = new THREE.HemisphereLight(
     0xFFFFFF, // bright sky color
     0xe0d3af, // dim ground color
@@ -137,7 +134,6 @@ const ambientLight = new THREE.HemisphereLight(
 let guttmanPosition;
 scene.add(ambientLight)
 // Load a glTF resource
-
 if (!testing) {
     var galleryModelUrl = process.env.NODE_ENV !== 'production' ? './NPHT.gltf' : themeDir + '/dist/NPHT.gltf'
     loader.load(galleryModelUrl, (gltf) => {
@@ -149,37 +145,7 @@ if (!testing) {
     },
     );
 }
-
-
-
-// load text 
-window.onload = function () {
-    var canvas = document.getElementById("textCanvas");
-    var context = canvas.getContext("2d");
-    context.font = "200px gotham";
-    var ele = document.getElementById("testText");
-
-    if (ele.textContent) {
-        // for firefox
-        context.fillText(ele.textContent, 10, 90);
-        //  context.fillText(ele1.textContent, 10, 110);
-    } else {
-        // for other browser
-        context.fillText(ele.innerText, 10, 90);
-        //    context.fillText(ele1.innerText, 10, 110);
-    }
-
-    var img = document.getElementById("exportedImage");
-    img.src = canvas.toDataURL('image/png');
-
-    console.log(img.src)
-}
-
-
-
-
-
-
+// lights
 const guttmanLight = new THREE.RectAreaLight(0xEBFAFF, 7, 300, 10)
 guttmanLight.name = 'guttmanLight'
 guttmanLight.position.set(-20, 7, -200)
@@ -585,82 +551,66 @@ function onMouseMove(event) {
 }
 // Which camera should we use?
 const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) : new CameraControls(camera, renderer.domElement)
-
 // listeners
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 start.addEventListener("click", beginTour);
-
 // create text labels
 Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
     var ele = zone.children[0]
     var canvas = zone.children[1]
-
     canvas.width = ele.clientWidth * 2
     canvas.height = ele.clientHeight * 2
-
     var context = canvas.getContext("2d");
-    context.font = "50px gotham";
-
+    context.font = "30px gothammedium";
     context.fillStyle = "#000";
-
     if (ele.textContent) {
         // for firefox
         context.fillText(ele.textContent, 0, canvas.height / 2);
-        // context.fillText(ele1.textContent, 10, 110);
     } else {
-        // for other browser
-        context.fillText(ele.innerText, 0, canvas.height);
-        // context.fillText(ele1.innerText, 10, 110);
+        context.fillText(ele.innerText, 0, canvas.height / 2);
     }
-
     var img = zone.children[2]
     //onsole.log(canvas.toDataURL('image/png'))
     img.src = canvas.toDataURL('image/png');
     const title = textureLoader.load(img.src)
-    const geometry = new THREE.PlaneGeometry(canvas.width/7 , canvas.height /7);
-    const material = new THREE.MeshBasicMaterial({ map: title, alphaTest: 0.5 });
+    let ratio = canvas.width < 500 ? 7 : 15
+    const geometry = new THREE.PlaneGeometry(canvas.width / ratio, canvas.height / ratio);
+    const material = new THREE.MeshBasicMaterial({
+        map: title,
+        color: 0xffffff,
+        alphaTest: 0.5
+    });
     console.log(material)
     const plane = new THREE.Mesh(geometry, material);
-
+    plane.position.y = 18
+    // left
     if (i == 0) {
-        plane.position.z = -100
-        plane.position.x = 29
+        plane.position.set(29.460, 18.990, -113.880)
         plane.rotation.y = -Math.PI / 2
-   
     }
-
     if (i == 1) {
-        plane.position.x = 29
-        plane.position.z = 100
+        plane.position.set(29.460, 18.990, 100)
         plane.rotation.y = -Math.PI / 2
-
     }
-
+    // backwall
     if (i == 2) {
-        plane.position.x = 0
-        plane.position.z = 213
+        plane.position.set(0, 18.990, 213)
         plane.rotation.y = Math.PI
-       
     }
-
+    // right
     if (i == 3) {
-        plane.position.x = 0
-        plane.position.z = 213
-     //   plane.rotation.y = Math.PI
-       
+        plane.position.set(-87.890, 18.990, 100)
+        plane.rotation.y = Math.PI / 2
     }
-
-   
-   
-
+    if (i == 4) {
+        plane.position.set(-87.890, 18.990, -113.880)
+        plane.rotation.y = Math.PI / 2
+    }
     scene.add(plane);
-
 })
-
-
-
+// ZONE LIGHTS
 function beginTour(params) {
     enterDoor()
     setTimeout(() => {
@@ -783,7 +733,6 @@ function enterGallery() {
     })
     gsap.to('#menuButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
     gsap.to('#infoButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
-
     gsap.to(scene.getObjectByName('Glass_Door_Right').position, {
         x: -94000, delay: 1, duration: 1,
     })
@@ -793,14 +742,11 @@ function enterGallery() {
             selectSpot = 1
             showArrows()
             stepTwoDone = true
-
             document.getElementById('enterGallery').style.display = 'none'
             document.getElementById('closeHowTo').style.display = 'block'
-
         }
     })
 }
-
 async function turnAround() {
     cameraControls.enabled = true
     hideArrows()

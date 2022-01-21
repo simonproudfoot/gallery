@@ -15,11 +15,29 @@
 
 <div class="zoneTitles">
     <h1>
-        Zone longer name, so big!!
+        Zone 3. longer name
     </h1>
     <canvas></canvas>
     <img src="#" />
 </div>
+
+<div class="zoneTitles">
+    <h1>
+        Zone 5. 
+    </h1>
+    <canvas></canvas>
+    <img src="#" />
+</div>
+
+<div class="zoneTitles">
+    <h1>
+        Zone 6. 
+    </h1>
+    <canvas></canvas>
+    <img src="#" />
+</div>
+
+
 <div id="menuButton" class="nav-icon-wrapper" style="opacity: 0;">
     <div class="icon nav-icon">
         <span></span>
