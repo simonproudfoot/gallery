@@ -19,6 +19,7 @@ let waitForStep2 = true
 let artifacstLoaded = false
 const cameraHeight = 7
 const roomCenter = { x: -30.000, y: 10.000, z: 0 }
+let zoneTitles;
 const axios = require('axios').default;
 const loader = new GLTFLoader();
 let testing = false;
@@ -163,6 +164,7 @@ scene.add(boundingBoxGeom);
 await axios.get(afcUrl)
     .then(function (response) {
         database = response.data.acf.artifacts
+        zoneTitles = response.data.acf.zones
     })
     .catch(function (error) {
         console.log(error);
@@ -557,21 +559,33 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 start.addEventListener("click", beginTour);
 // create text labels
-Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
-    var ele = zone.children[0]
-    var canvas = zone.children[1]
-    canvas.width = ele.clientWidth * 2
-    canvas.height = ele.clientHeight * 2
+zoneTitles.forEach((zone, i) => {
+    console.log(zone.zone)
+    var wrapper = document.createElement('div');
+    wrapper.classList.add('zoneTitles')
+    document.body.appendChild(wrapper);
+   
+    var ele = document.createElement('h1');
+    ele.innerHTML = zone.zone
+    wrapper.appendChild(ele);
+
+    var canvas = document.createElement('canvas');
+    wrapper.appendChild(canvas);
+
+    var img = document.createElement('img');
+    wrapper.appendChild(img);
+
     var context = canvas.getContext("2d");
     context.font = "30px gothammedium";
     context.fillStyle = "#000";
+    console.log('Adding title', ele.innerHTML)
     if (ele.textContent) {
         // for firefox
         context.fillText(ele.textContent, 0, canvas.height / 2);
     } else {
         context.fillText(ele.innerText, 0, canvas.height / 2);
     }
-    var img = zone.children[2]
+  
     //onsole.log(canvas.toDataURL('image/png'))
     img.src = canvas.toDataURL('image/png');
     const title = textureLoader.load(img.src)

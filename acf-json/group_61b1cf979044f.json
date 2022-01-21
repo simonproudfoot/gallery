@@ -266,6 +266,46 @@
                     "maxlength": ""
                 }
             ]
+        },
+        {
+            "key": "field_61eaf349584f7",
+            "label": "zones",
+            "name": "zones",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "collapsed": "",
+            "min": 4,
+            "max": 4,
+            "layout": "table",
+            "button_label": "",
+            "sub_fields": [
+                {
+                    "key": "field_61eaf359584f8",
+                    "label": "zone",
+                    "name": "zone",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "maxlength": ""
+                }
+            ]
         }
     ],
     "location": [
@@ -300,5 +340,5 @@
     ],
     "active": true,
     "description": "",
-    "modified": 1640106620
+    "modified": 1642787716
 }

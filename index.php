@@ -1,42 +1,4 @@
 <?php get_template_part('/includes/header'); ?>
-<div class="zoneTitles">
-    <h1>Zone 1</h1>
-    <canvas></canvas>
-    <img src="#" />
-</div>
-
-<div class="zoneTitles">
-    <h1>
-        Zone 2
-    </h1>
-    <canvas></canvas>
-    <img src="#" />
-</div>
-
-<div class="zoneTitles">
-    <h1>
-        Zone 3. longer name
-    </h1>
-    <canvas></canvas>
-    <img src="#" />
-</div>
-
-<div class="zoneTitles">
-    <h1>
-        Zone 5. 
-    </h1>
-    <canvas></canvas>
-    <img src="#" />
-</div>
-
-<div class="zoneTitles">
-    <h1>
-        Zone 6. 
-    </h1>
-    <canvas></canvas>
-    <img src="#" />
-</div>
-
 
 <div id="menuButton" class="nav-icon-wrapper" style="opacity: 0;">
     <div class="icon nav-icon">
@@ -55,7 +17,6 @@
     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,</p>
     <button id="enterGallery">GOT IT</button>
     <button id="closeHowTo" style="display: none;">GOT IT</button>
-
 </div>
 <div id="menu" class="menu" style="display: none;">
     <div class="menu__inner">
@@ -123,13 +84,13 @@
             <span class="ring"></span>
         </div>
     </div>
-
 </div>
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
 <canvas class="webgl">
 </canvas>
 <img id="goback" src="<?php bloginfo('template_directory'); ?>/src/images/turn.svg" width="100" height="100" style="display:none;">
-<img id="left" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move left icon" style="transform: scaleX(-1); display: none"></div>
+<img id="left" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move left icon" style="transform: scaleX(-1); display: none">
+</div>
 <img id="right" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move right icon" style="display: none"></div>
 <div id="controls" class="controls d-none"></div>
 </body>
