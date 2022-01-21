@@ -162,11 +162,11 @@ window.onload = function () {
     if (ele.textContent) {
         // for firefox
         context.fillText(ele.textContent, 10, 90);
-      //  context.fillText(ele1.textContent, 10, 110);
+        //  context.fillText(ele1.textContent, 10, 110);
     } else {
         // for other browser
         context.fillText(ele.innerText, 10, 90);
-    //    context.fillText(ele1.innerText, 10, 110);
+        //    context.fillText(ele1.innerText, 10, 110);
     }
 
     var img = document.getElementById("exportedImage");
@@ -590,6 +590,55 @@ const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) 
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
+start.addEventListener("click", beginTour);
+
+// create text labels
+Array.from(document.getElementsByClassName("zoneTitles")).forEach((zone, i) => {
+    var ele = zone.children[0]
+    // var width = window.getComputedStyle(ele, null)
+    var canvas = zone.children[1]
+    var context = canvas.getContext("2d", { alpha: false });
+    context.font = "80px gotham";
+    context.outlinePass =
+        context.fillStyle = "#fff";
+    //  console.log('cnte', context)
+
+    // console.log(width)
+
+
+    if (ele.textContent) {
+        // for firefox
+        context.fillText(ele.textContent, 10, 90);
+        // context.fillText(ele1.textContent, 10, 110);
+    } else {
+        // for other browser
+        context.fillText(ele.innerText, 10, 90);
+        // context.fillText(ele1.innerText, 10, 110);
+    }
+
+    var img = zone.children[2]
+    //onsole.log(canvas.toDataURL('image/png'))
+    img.src = canvas.toDataURL('image/png');
+    const title = textureLoader.load(img.src)
+    const geometry = new THREE.PlaneGeometry(50, 50);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffff00, side: THREE.DoubleSide, map: title });
+    const plane = new THREE.Mesh(geometry, material);
+
+    if (i == 0) {
+        plane.position.x = 29
+        plane.rotation.y = -Math.PI / 2
+        //scene.add(plane);
+    }
+
+    if (i == 1) {
+        plane.position.x = 29
+        plane.rotation.y = -Math.PI / 2
+        scene.add(plane);
+    }
+
+
+
+})
 
 
 

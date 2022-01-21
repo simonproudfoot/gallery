@@ -146,8 +146,7 @@ button {
   z-index: 9999;
 }
 
-
-.infoButton{
+.infoButton {
   position: fixed;
   top: 0;
   left: 20px;
@@ -157,4 +156,9 @@ button {
   z-index: 99999;
 }
 
-
+.zoneTitles {
+  visibility: none;
+  z-index: -1;
+  position: fixed;
+  pointer-events: none;
+}

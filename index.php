@@ -1,11 +1,26 @@
 <?php get_template_part('/includes/header'); ?>
 
-<div id="testText" style="border: solid 1px gray; padding: 5px;">
-first line
+<div class="zoneTitles">
+    <h1>Zone 1</h1>
+    <canvas></canvas>
+    <img src="#" />
 </div>
 
-<canvas id="textCanvas" width="200" height="200" style="border: solid 1px gray;">
-<img id="exportedImage" width="200" height="200" src="#" />
+<div class="zoneTitles">
+    <h1>
+        Zone 2
+    </h1>
+    <canvas></canvas>
+    <img src="#" />
+</div>
+
+<div class="zoneTitles">
+    <h1>
+        Zone longer name
+    </h1>
+    <canvas></canvas>
+    <img src="#" />
+</div>
 <div id="menuButton" class="nav-icon-wrapper" style="opacity: 0;">
     <div class="icon nav-icon">
         <span></span>
