@@ -564,7 +564,7 @@ zoneTitles.forEach((zone, i) => {
     var wrapper = document.createElement('div');
     wrapper.classList.add('zoneTitles')
     document.body.appendChild(wrapper);
-   
+
     var ele = document.createElement('h1');
     ele.innerHTML = zone.zone
     wrapper.appendChild(ele);
@@ -578,30 +578,32 @@ zoneTitles.forEach((zone, i) => {
     var context = canvas.getContext("2d");
     context.font = "30px gothammedium";
     context.fillStyle = "#000";
-    console.log('Adding title', ele.innerHTML)
+
     if (ele.textContent) {
         // for firefox
         context.fillText(ele.textContent, 0, canvas.height / 2);
     } else {
         context.fillText(ele.innerText, 0, canvas.height / 2);
     }
-  
+
     //onsole.log(canvas.toDataURL('image/png'))
     img.src = canvas.toDataURL('image/png');
     const title = textureLoader.load(img.src)
     let ratio = canvas.width < 500 ? 7 : 15
     const geometry = new THREE.PlaneGeometry(canvas.width / ratio, canvas.height / ratio);
     const material = new THREE.MeshBasicMaterial({
-        map: title,
+         map: title,
         color: 0xffffff,
-        alphaTest: 0.5
+        side: THREE.DoubleSide,
+          alphaTest: 0.5
     });
     console.log(material)
     const plane = new THREE.Mesh(geometry, material);
     plane.position.y = 18
+    plane.name = 'title:' + ele.innerHTML
     // left
     if (i == 0) {
-        plane.position.set(29.460, 18.990, -113.880)
+        plane.position.set(29.460, 18.990, -107.880)
         plane.rotation.y = -Math.PI / 2
     }
     if (i == 1) {
@@ -619,9 +621,11 @@ zoneTitles.forEach((zone, i) => {
         plane.rotation.y = Math.PI / 2
     }
     if (i == 4) {
-        plane.position.set(-87.890, 18.990, -113.880)
+        plane.material.color.setHex(0xff0000)
+        plane.position.set(-87.890, 18.990, -107.880)
         plane.rotation.y = Math.PI / 2
     }
+
     scene.add(plane);
 })
 // ZONE LIGHTS
