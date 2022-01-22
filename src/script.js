@@ -181,9 +181,9 @@ function sideMoves(event) {
         artifacts.forEach((element, i) => {
             if (element.userData.location == cur) {
                 const prev = i - 1
-                console.log('current name', artifacts[i].name)
-                console.log('current location', artifacts[i].userData.location + 1)
-                console.log('back to', artifacts[prev].userData.location)
+                // console.log('current name', artifacts[i].name)
+                // console.log('current location', artifacts[i].userData.location + 1)
+                // console.log('back to', artifacts[prev].userData.location)
                 selectSpot = artifacts[prev].userData.location + 1
             }
         });
@@ -236,7 +236,7 @@ function makeInfoPoint(location, name, wallmount) {
             infoPoint.position.x -= 8
         }
     }
-    if (between(location, 15, 20)) {
+    if (between(location, 15, 25)) {
         infoPoint.rotation.y = Math.PI / 2
         infoPoint.position.x = -89.380
         if (wallmount) {
@@ -260,7 +260,7 @@ function makeSprite(location, position, i) {
     if (between(location, 9, 16)) {
         spritey.position.z -= 10
     }
-    if (between(location, 15, 20)) {
+    if (between(location, 15, 25)) {
         spritey.position.x += 5
     }
     sprites.push(spritey)
@@ -292,7 +292,7 @@ function makeLight(location, position) {
         rectAreaLight.rotation.y = -Math.PI
         rectAreaLight.position.z -= 15
     }
-    if (between(location, 15, 20)) {
+    if (between(location, 15, 25)) {
         rectAreaLight.rotation.y = Math.PI / 2
         rectAreaLight.position.x += 20
     }
@@ -325,7 +325,7 @@ function calcPesistalPosition(position, location) {
     if (between(location, 9, 16)) {
         position.z -= 10
     }
-    if (between(location, 15, 20)) {
+    if (between(location, 15, 25)) {
         //   alert('moe me ')
         position.x += 10
     }
@@ -339,7 +339,7 @@ function calcWallmountRotation(location) {
     if (between(location, 9, 16)) {
         rotation = Math.PI / 2
     }
-    if (between(location, 15, 20)) {
+    if (between(location, 15, 25)) {
         rotation = 0
     }
     return rotation
@@ -437,7 +437,7 @@ function loadartifacts(params) {
                 }
                 mount.scale.set(1.0, imgSize, 1.0);
                 artifacts.push(mount)
-                //mount.visible = false
+         
             });
         }
         // finished
@@ -719,7 +719,7 @@ async function lookAtArtifact(params, firstStep) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
         }
-        if (between(selectSpot, 15, 20)) {
+        if (between(selectSpot, 15, 25)) {
             cameraStand.position.set(nextPos.x + 30, cameraHeight, nextPos.z)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
@@ -755,7 +755,7 @@ function enterGallery() {
         x: -94000, delay: 1, duration: 1,
     })
     gsap.to(scene.getObjectByName('Glass_Door_Left').position, {
-        x: -36000, delay: 1, duration: 1, onComplete: async () => {
+        x: -33000, delay: 1, duration: 1, onComplete: async () => {
             await cameraControls.dollyTo(100, true);
             selectSpot = 1
             showArrows()
