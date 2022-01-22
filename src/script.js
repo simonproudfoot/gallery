@@ -80,7 +80,8 @@ let gui = null
 let showSettings = false
 // LISTENERS
 document.getElementById("enterGallery").addEventListener("click", enterGallery);
-document.getElementById("infoButton").addEventListener("click", openHowTo);
+document.getElementById("infoButton").addEventListener("click", toggleHowTo);
+document.getElementById("menuButton").addEventListener("click", toggleMenu);
 function openHowTo() {
     gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
 }
@@ -151,7 +152,7 @@ if (!testing) {
 // Create center reference box
 const centerBox = new THREE.Mesh(
     new THREE.BoxGeometry(5, 5, 5),
-    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, visible: true })
+    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, visible: false })
 );
 centerBox.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(centerBox);
@@ -484,20 +485,20 @@ renderer.physicallyCorrectLights = true
 function selectObjectFromMenu() {
     const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
-    console.log('finding....', val)
-    if (open) {
-        closeMenu()
-    }
-    if (selectSpot) {
-        turnAround()
-        setTimeout(() => {
-            selectSpot = val
-            showArrows()
-        }, 1000);
-    }
-    else {
+    selectSpot = val
+    // if (open) {
+    //     closeMenu()
+    // }
+    // if (selectSpot) {
+    //     turnAround()
+    //     setTimeout(() => {
+    //         selectSpot = val
+    //         showArrows()
+    //     }, 1000);
+    // }
+    // else {
 
-    }
+    // }
 }
 function onDocumentMouseDown(event) {
     if (!event.target.classList.contains('allowClick')) {
@@ -542,6 +543,7 @@ compose.render(scene, camera)
 let hoverSpot = ''
 console.log(outlinePass)
 document.addEventListener('mousemove', onMouseMove, false);
+
 function onMouseMove(event) {
     sprites.forEach(i => i.material.color.set(0xffffff));
     if (!intro && !selectSpot) {
@@ -678,7 +680,7 @@ camera.lookAt(new THREE.Vector3(roomCenter.x, roomCenter.y, roomCenter.z))
 // CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 0.2, 0.2),
-    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: true })
+    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: false })
 );
 cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(cameraStand);
@@ -841,26 +843,33 @@ const animate = () => {
 animate()
 // unhide doc
 document.body.style.display = 'block'
-// open menu
-const menu = document.getElementById('menu')
-const icons = document.querySelectorAll('.icon');
-icons.forEach(icon => {
-    icon.addEventListener('click', (event) => {
-        icon.classList.toggle("open");
-        menu.classList.toggle("open");
-        if (menu.classList.contains('open')) {
-            gsap.fromTo(menu, { opacity: 0, x: 300, duration: 0.5, display: 'none' }, { opacity: 1, x: 0, display: 'block' })
-        } else {
-            closeMenu()
-        }
-    });
-});
-function closeMenu() {
-    gsap.fromTo(menu, { opacity: 1, x: 0, display: 'block', duration: 0.5 }, { opacity: 0, x: 300, display: 'none' })
-    icons.forEach(icon => {
-        icon.classList.remove("open");
-    })
+
+// menus
+function toggleMenu() {
+    const sideMenu = document.getElementById('menu')
+    const button = document.getElementById('menuButton').children[0];
+    if (sideMenu.style.display == 'none') {
+        button.classList.add('open')
+        gsap.to(sideMenu, { opacity: 1, x: 0, display: 'block', duration: 0.5 })
+    } else {
+        button.classList.remove('open')
+        gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
+    }
 }
+
+function toggleHowTo() {
+    const sideMenu = document.getElementById('infoWindow')
+    const button = document.getElementById('menuButton').children[0];
+    if (sideMenu.style.display == 'none') {
+        button.classList.add('open')
+        gsap.to(sideMenu, { opacity: 1, x: 0, display: 'block', duration: 0.5 })
+    } else {
+        button.classList.remove('open')
+        gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
+    }
+}
+
+
 function openInfoWindow() {
     let footer = document.getElementById('infoWindow__footer')
     let contentTitle = ''
