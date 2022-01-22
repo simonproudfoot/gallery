@@ -146,6 +146,17 @@ if (!testing) {
     },
     );
 }
+
+
+// Create center reference box
+const centerBox = new THREE.Mesh(
+    new THREE.BoxGeometry(5, 5, 5),
+    new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, visible: true })
+);
+centerBox.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
+scene.add(centerBox);
+
+
 // lights
 const guttmanLight = new THREE.RectAreaLight(0xEBFAFF, 7, 300, 10)
 guttmanLight.name = 'guttmanLight'
@@ -248,6 +259,7 @@ function makeInfoPoint(location, name, wallmount) {
     infoPoints.push(infoPoint)
     scene.add(infoPoint)
 }
+
 function makeSprite(location, position, i) {
     var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     var spritey = makeTextSprite('', colors[i]);
@@ -266,20 +278,8 @@ function makeSprite(location, position, i) {
     sprites.push(spritey)
     scene.add(spritey);
 }
-function makeClickSprite(position, location) {
-    var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
-    var spritey = makeTextSprite(0xFFFFFF);
-    spritey.position.copy(position)
-    if (location <= 10) {
-        spritey.position.x -= 3
-    } else {
-        spritey.position.x += 3
-    }
-    //    sprites.push(spritey)
-    makeClickSprite = spritey.name = 'selectedSprite-' + location
-    clickHere = spritey.namema
-    scene.add(spritey);
-}
+
+
 function makeLight(location, position) {
     const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
     rectAreaLight.position.copy(position)
@@ -299,6 +299,8 @@ function makeLight(location, position) {
     rectAreaLight.name = 'light-' + location
     scene.add(rectAreaLight)
 }
+
+
 function makeMenuItem(title, position, i) {
     // add items to menu
     var modList = document.getElementById('menuItems')
@@ -315,9 +317,12 @@ function makeMenuItem(title, position, i) {
     newLI.appendChild(newSprite)
     document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);
 }
+
 function between(x, min, max) {
     return x >= min && x <= max;
 }
+
+
 function calcPesistalPosition(position, location) {
     if (between(location, 0, 9)) {
         position.x -= 10
@@ -331,6 +336,8 @@ function calcPesistalPosition(position, location) {
     }
     return position
 }
+
+
 function calcWallmountRotation(location) {
     var rotation;
     if (between(location, 0, 9)) {
@@ -344,6 +351,8 @@ function calcWallmountRotation(location) {
     }
     return rotation
 }
+
+
 function makePedistal(position, location) {
     // create a pedistal
     var newArtifact = new THREE.Mesh(pedestalGeometry, material1);
@@ -352,6 +361,8 @@ function makePedistal(position, location) {
     newArtifact.position.y = -2.2 // sit on floot
     scene.add(newArtifact)
 }
+
+
 function makeWallMount(location) {
     // create a pedistal
     const position = positions[location]
@@ -361,6 +372,8 @@ function makeWallMount(location) {
     scene.add(newWallmount)
     return newWallmount
 }
+
+
 function dynamicSort(property) {
     var sortOrder = 1;
     if (property[0] === "-") {
@@ -375,6 +388,8 @@ function dynamicSort(property) {
         return result * sortOrder;
     }
 }
+
+
 function loadartifacts(params) {
     database.forEach(async (element, i) => {
         // LOAD artifacts
@@ -408,7 +423,7 @@ function loadartifacts(params) {
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
             makeSprite(location, loadedArtifact.scene.position, i)
-      
+
             makeMenuItem(element.artifact_title, element.location, i)
             makeInfoPoint(location, 'info-' + location, null)
         }
@@ -449,6 +464,8 @@ function loadartifacts(params) {
         }
     })
 }
+
+
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
@@ -479,7 +496,7 @@ function selectObjectFromMenu() {
         }, 1000);
     }
     else {
-       
+
     }
 }
 function onDocumentMouseDown(event) {
@@ -660,7 +677,7 @@ if (!testing) {
 camera.lookAt(new THREE.Vector3(roomCenter.x, roomCenter.y, roomCenter.z))
 // CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.BoxGeometry(0.2, 0.2, 0.2),
     new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: true })
 );
 cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
@@ -682,32 +699,20 @@ function customFitTo() {
         cameraStand.position.z + distanceToFit,
         true
     );
+
+
 }
 if (!testing) {
     cameraControls.setPosition(0, cameraHeight, -210)
 }
-async function startTour() {
-    // setTimeout(() => {
-    //cameraControls.setTarget(cameraStand.position.x, cameraHeight, cameraStand.position.z, true);
-    cameraControls.moveTo(cameraStand.position.x, cameraHeight, 20, true);
-    // cameraControls.forward(500, true)
-    cameraControls.rotateTo(0, - Math.PI / 2, true)
-    // intro = false
-    // ready = true
-    // cameraControls.enabled = true
-    return true
-    //  },10000);
-}
-var nextPos = {}
+
+let nextPos = {}
+let lastPosition = null
 async function lookAtArtifact(params, firstStep) {
     if (selectSpot) {
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
-
-
-     
-
-
+        lastPosition = selectSpot
 
         artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
@@ -717,7 +722,6 @@ async function lookAtArtifact(params, firstStep) {
             }
         })
 
-       
         //  console.log(nextPos)
         if (between(selectSpot, 0, 9)) {
             cameraStand.position.set(nextPos.x - 30, cameraHeight, nextPos.z)
@@ -733,6 +737,7 @@ async function lookAtArtifact(params, firstStep) {
         }
         if (between(selectSpot, 15, 25)) {
             cameraStand.position.set(nextPos.x + 30, cameraHeight, nextPos.z)
+            // cameraStand.lookAt(centerBox.position.x, centerBox.position.y, centerBox.position.z)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
@@ -748,9 +753,11 @@ async function lookAtArtifact(params, firstStep) {
     }
     if (waiting && !selectSpot) {
         if (!testing) {
-            cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
-            //cameraControls.setLookAt(, cameraHeight, 0, true)
-            await cameraControls.rotateTo(Math.PI / 2, Math.PI / 4, true);
+            cameraControls.setTarget(centerBox.position.x, centerBox.position.y, centerBox.position.z, true)
+            cameraControls.dollyTo(3, true);
+            cameraControls.fitToBox(cameraStand, true);
+            cameraControls.enabled = true
+            lastPosition = null
             waiting = false
         }
     }
@@ -782,17 +789,9 @@ function enterGallery() {
     })
 }
 async function turnAround() {
-    cameraControls.enabled = true
+
     hideArrows()
-    if (!testing) {
-        // await cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, roomCenter.x, roomCenter.y, roomCenter.z, true)
-        // cameraControls.moveTo(
-        //     cameraStand.position.x,
-        //     cameraHeight,
-        //     cameraStand.position.z,
-        //     true
-        // );
-    }
+
     selectSpot = null
     waiting = true
 }
@@ -819,9 +818,7 @@ const animate = () => {
     }
     // INTRO - WALK INTO ROOM
     if (intro && started && doneLoading) {
-        //  selectSpot=1
         lookAtArtifact(false, true)
-        //cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
     } else if (selectSpot) {
         lookAtArtifact()
     }
