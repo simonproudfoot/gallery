@@ -408,7 +408,8 @@ function loadartifacts(params) {
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
             makeSprite(location, loadedArtifact.scene.position, i)
-            makeMenuItem(element.artifact_title, location, location)
+      
+            makeMenuItem(element.artifact_title, element.location, i)
             makeInfoPoint(location, 'info-' + location, null)
         }
         // LOAD IMAGES
@@ -437,7 +438,7 @@ function loadartifacts(params) {
                 }
                 mount.scale.set(1.0, imgSize, 1.0);
                 artifacts.push(mount)
-         
+
             });
         }
         // finished
@@ -466,7 +467,7 @@ renderer.physicallyCorrectLights = true
 function selectObjectFromMenu() {
     const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
-    showArrows()
+    console.log('finding....', val)
     if (open) {
         closeMenu()
     }
@@ -474,10 +475,11 @@ function selectObjectFromMenu() {
         turnAround()
         setTimeout(() => {
             selectSpot = val
+            showArrows()
         }, 1000);
     }
     else {
-        selectSpot = val
+       
     }
 }
 function onDocumentMouseDown(event) {
@@ -592,10 +594,10 @@ zoneTitles.forEach((zone, i) => {
     let ratio = canvas.width < 500 ? 7 : 15
     const geometry = new THREE.PlaneGeometry(canvas.width / ratio, canvas.height / ratio);
     const material = new THREE.MeshBasicMaterial({
-         map: title,
+        map: title,
         color: 0xffffff,
         side: THREE.DoubleSide,
-          alphaTest: 0.5
+        alphaTest: 0.5
     });
     console.log(material)
     const plane = new THREE.Mesh(geometry, material);
@@ -659,7 +661,7 @@ camera.lookAt(new THREE.Vector3(roomCenter.x, roomCenter.y, roomCenter.z))
 // CREATE A BOX TO FOLLOW
 const cameraStand = new THREE.Mesh(
     new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: false })
+    new THREE.MeshBasicMaterial({ color: '0xff0000', wireframe: true, visible: true })
 );
 cameraStand.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(cameraStand);
@@ -701,12 +703,22 @@ async function lookAtArtifact(params, firstStep) {
     if (selectSpot) {
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
+
+
+     
+
+
+
         artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
+                console.log('got....', element.name)
                 nextPos.x = element.position.x
                 nextPos.z = element.position.z
             }
         })
+
+       
+        //  console.log(nextPos)
         if (between(selectSpot, 0, 9)) {
             cameraStand.position.set(nextPos.x - 30, cameraHeight, nextPos.z)
             if (!testing) {
@@ -726,17 +738,21 @@ async function lookAtArtifact(params, firstStep) {
             }
         }
     } else if (firstStep) {
-        if (!stepOneDone) {
-            cameraStand.position.set(cameraStand.position.x, cameraHeight, 20)
-            stepOneDone = true
-            gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
+        if (!testing) {
+            if (!stepOneDone) {
+                cameraStand.position.set(cameraStand.position.x, cameraHeight, 20)
+                stepOneDone = true
+                gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
+            }
         }
     }
     if (waiting && !selectSpot) {
-        cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
-        //cameraControls.setLookAt(, cameraHeight, 0, true)
-        await cameraControls.rotateTo(Math.PI / 2, Math.PI / 4, true);
-        waiting = false
+        if (!testing) {
+            cameraControls.setPosition(cameraStand.position.x, cameraHeight, cameraStand.position.z, true)
+            //cameraControls.setLookAt(, cameraHeight, 0, true)
+            await cameraControls.rotateTo(Math.PI / 2, Math.PI / 4, true);
+            waiting = false
+        }
     }
 }
 document.getElementById("closeHowTo").addEventListener("click", closeHowTo);
@@ -882,20 +898,22 @@ function openInfoWindow() {
     infoWindowOpen = true
 }
 function showArrows() {
-    backButton.style.display = 'block'
-    // if (selectSpot > 0) {
-    gsap.to('#left', { x: 0, opacity: 1, duration: 1, display: 'block' })
-    //} else {
-    //left.style.display = 'none'
-    //}
-    //if (selectSpot <= artifacts.length) {
-    gsap.to('#right', { x: 0, opacity: 1, duration: 1, display: 'block' })
-    //} else {
-    //right.style.display = 'none'
-    //}
-    // alert(selectSpot)
-    gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
-    cameraControls.enabled = false
+    if (!testing) {
+        backButton.style.display = 'block'
+        // if (selectSpot > 0) {
+        gsap.to('#left', { x: 0, opacity: 1, duration: 1, display: 'block' })
+        //} else {
+        //left.style.display = 'none'
+        //}
+        //if (selectSpot <= artifacts.length) {
+        gsap.to('#right', { x: 0, opacity: 1, duration: 1, display: 'block' })
+        //} else {
+        //right.style.display = 'none'
+        //}
+        // alert(selectSpot)
+        gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
+        cameraControls.enabled = false
+    }
 }
 function hideArrows() {
     gsap.to('#left', { x: -100, opacity: 0, duration: 1 })
