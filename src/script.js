@@ -192,15 +192,23 @@ await axios.get(afcUrl)
 function sideMoves(event) {
     const indexIs = (element) => element.location == selectSpot;
     let currentIndex = database.findIndex(indexIs)
-    let nextIndex = database.findIndex(indexIs)+1
-    let prevIndex = database.findIndex(indexIs)-1
+    let nextIndex = database.findIndex(indexIs) + 1
+    let prevIndex = database.findIndex(indexIs) - 1
 
-    if (event.target.id == 'right') {       
-        selectSpot =  database[nextIndex].location
+    if (event.target.id == 'right') {
+        if (database[nextIndex] != undefined) {
+            selectSpot = database[nextIndex].location
+        } else {
+            selectSpot = database[0].location
+        }
     }
 
     if (event.target.id == 'left') {
-        selectSpot =  database[prevIndex].location
+        if (selectSpot != 1) {
+            selectSpot = database[prevIndex].location
+        } else {
+            selectSpot = database.slice(-1).pop().location
+        }
     }
 
 
