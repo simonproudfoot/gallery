@@ -727,13 +727,13 @@ async function lookAtArtifact(params, firstStep) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
         }
-        if (between(selectSpot, 11, 14)) {
+        if (between(selectSpot, 11, 15)) {
             cameraStand.position.set(nextPos.x, cameraHeight, nextPos.z - 30)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
         }
-        if (between(selectSpot, 15, 25)) {
+        if (between(selectSpot, 16, 25)) {
             cameraStand.position.set(nextPos.x + 30, cameraHeight, nextPos.z)
             // alert('me')
             // cameraStand.lookAt(centerBox.position.x, centerBox.position.y, centerBox.position.z)
