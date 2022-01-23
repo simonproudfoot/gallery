@@ -1,4 +1,5 @@
 <?php get_template_part('/includes/header'); ?>
+
 <div id="menuButton" class="nav-icon-wrapper" style="opacity: 0;">
     <div class="icon nav-icon">
         <span></span>
@@ -8,7 +9,7 @@
 </div>
 <div id="infoButton" class="nav-icon-wrapper infoButton" style="opacity: 0;">
     <div class="icon nav-icon">
-        <h1>I</h1>
+        <h1 id="lookAt">I</h1>
         <img class="infoButton" src="<?php bloginfo('template_directory'); ?>/src/images/info.svg" width="300" alt="How to">
     </div>
 </div>

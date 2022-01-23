@@ -78,13 +78,14 @@ var x = 10
 var i = 1
 let gui = null
 let showSettings = false
+
 // LISTENERS
 document.getElementById("enterGallery").addEventListener("click", enterGallery);
 document.getElementById("infoButton").addEventListener("click", toggleHowTo);
 document.getElementById("menuButton").addEventListener("click", toggleMenu);
-function openHowTo() {
-    gsap.fromTo('.howto', { display: 'none', autoAlpha: 0, x: 100 }, { display: 'block', autoAlpha: 1, x: 0, duration: 1, delay: 1 })
-}
+document.getElementById("left").addEventListener("click", sideMoves);
+document.getElementById("right").addEventListener("click", sideMoves);
+
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'settings') {
     gui = new dat.GUI();
     showSettings = true
@@ -175,43 +176,34 @@ scene.add(boundingBoxGeom);
 // ADD THE USERS artifacts
 await axios.get(afcUrl)
     .then(function (response) {
-        database = response.data.acf.artifacts
+        database = response.data.acf.artifacts.sort((a, b) => a.location - b.location)
+        console.log(database)
         zoneTitles = response.data.acf.zones
     })
     .catch(function (error) {
         console.log(error);
     })
     .then(function () {
+
         loadartifacts()
     });
 // MOVE ALONG
-document.getElementById("left").addEventListener("click", sideMoves);
-document.getElementById("right").addEventListener("click", sideMoves);
+
 function sideMoves(event) {
-    const cur = selectSpot - 1
+    const indexIs = (element) => element.location == selectSpot;
+    let currentIndex = database.findIndex(indexIs)
+    let nextIndex = database.findIndex(indexIs)+1
+    let prevIndex = database.findIndex(indexIs)-1
+
+    if (event.target.id == 'right') {       
+        selectSpot =  database[nextIndex].location
+    }
+
     if (event.target.id == 'left') {
-        artifacts.forEach((element, i) => {
-            if (element.userData.location == cur) {
-                const prev = i - 1
-                // console.log('current name', artifacts[i].name)
-                // console.log('current location', artifacts[i].userData.location + 1)
-                // console.log('back to', artifacts[prev].userData.location)
-                selectSpot = artifacts[prev].userData.location + 1
-            }
-        });
+        selectSpot =  database[prevIndex].location
     }
-    if (event.target.id == 'right') {
-        artifacts.forEach((element, i) => {
-            if (element.userData.location == cur) {
-                const next = i + 1
-                console.log('current name', artifacts[i].name)
-                //   console.log('current location', artifacts[i].userData.location + 1)
-                console.log('next to', artifacts[next].name)
-                selectSpot = artifacts[next].userData.location + 1
-            }
-        });
-    }
-    lookAtArtifact()
+
+
 }
 // INFO WINDOW
 document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
@@ -230,6 +222,7 @@ function makeInfoPoint(location, name, wallmount) {
     infoPoint.position.copy(positions[location])
     infoPoint.position.y = 10
     infoPoint.name = name
+
     if (between(location, 0, 9)) {
         infoPoint.name = 'infoPoint' + location
         if (wallmount) {
@@ -240,7 +233,7 @@ function makeInfoPoint(location, name, wallmount) {
         infoPoint.rotation.y = Math.PI / 2
         // infoPoint.position.x 
     }
-    if (between(location, 9, 16)) {
+    if (between(location, 10, 14)) {
         infoPoint.position.z = 212
         if (wallmount) {
             infoPoint.position.x -= 13
@@ -248,7 +241,8 @@ function makeInfoPoint(location, name, wallmount) {
             infoPoint.position.x -= 8
         }
     }
-    if (between(location, 15, 25)) {
+
+    if (between(location, 15, 24)) {
         infoPoint.rotation.y = Math.PI / 2
         infoPoint.position.x = -89.380
         if (wallmount) {
@@ -267,13 +261,14 @@ function makeSprite(location, position, i) {
     spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
+
     if (between(location, 0, 9)) {
         spritey.position.x -= 10
     }
-    if (between(location, 9, 16)) {
+    if (between(location, 10, 14)) {
         spritey.position.z -= 10
     }
-    if (between(location, 15, 25)) {
+    if (between(location, 15, 24)) {
         spritey.position.x += 5
     }
     sprites.push(spritey)
@@ -285,15 +280,16 @@ function makeLight(location, position) {
     const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
     rectAreaLight.position.copy(position)
     rectAreaLight.position.y += 20
+
     if (between(location, 0, 9)) {
         rectAreaLight.rotation.y = -Math.PI / 2
         rectAreaLight.position.x -= 20
     }
-    if (between(location, 9, 16)) {
+    if (between(location, 10, 14)) {
         rectAreaLight.rotation.y = -Math.PI
         rectAreaLight.position.z -= 15
     }
-    if (between(location, 15, 25)) {
+    if (between(location, 15, 24)) {
         rectAreaLight.rotation.y = Math.PI / 2
         rectAreaLight.position.x += 20
     }
@@ -328,10 +324,10 @@ function calcPesistalPosition(position, location) {
     if (between(location, 0, 9)) {
         position.x -= 10
     }
-    if (between(location, 9, 16)) {
+    if (between(location, 10, 14)) {
         position.z -= 10
     }
-    if (between(location, 15, 25)) {
+    if (between(location, 15, 24)) {
         //   alert('moe me ')
         position.x += 10
     }
@@ -344,10 +340,10 @@ function calcWallmountRotation(location) {
     if (between(location, 0, 9)) {
         rotation = 0
     }
-    if (between(location, 9, 16)) {
+    if (between(location, 10, 14)) {
         rotation = Math.PI / 2
     }
-    if (between(location, 15, 25)) {
+    if (between(location, 15, 24)) {
         rotation = 0
     }
     return rotation
@@ -424,7 +420,6 @@ function loadartifacts(params) {
             makePedistal(selected, location) // position, i
             makeLight(location, selected)
             makeSprite(location, loadedArtifact.scene.position, i)
-
             makeMenuItem(element.artifact_title, element.location, i)
             makeInfoPoint(location, 'info-' + location, null)
         }
@@ -486,19 +481,12 @@ function selectObjectFromMenu() {
     const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
     selectSpot = val
-    // if (open) {
-    //     closeMenu()
-    // }
-    // if (selectSpot) {
-    //     turnAround()
-    //     setTimeout(() => {
-    //         selectSpot = val
-    //         showArrows()
-    //     }, 1000);
-    // }
-    // else {
+    toggleMenu()
 
-    // }
+    setTimeout(() => {
+        showArrows()
+    }, 1000);
+
 }
 function onDocumentMouseDown(event) {
     if (!event.target.classList.contains('allowClick')) {
@@ -581,7 +569,7 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 start.addEventListener("click", beginTour);
 // create text labels
 zoneTitles.forEach((zone, i) => {
-    console.log(zone.zone)
+
     var wrapper = document.createElement('div');
     wrapper.classList.add('zoneTitles')
     document.body.appendChild(wrapper);
@@ -618,7 +606,7 @@ zoneTitles.forEach((zone, i) => {
         side: THREE.DoubleSide,
         alphaTest: 0.5
     });
-    console.log(material)
+
     const plane = new THREE.Mesh(geometry, material);
     plane.position.y = 18
     plane.name = 'title:' + ele.innerHTML
@@ -711,27 +699,27 @@ if (!testing) {
 let nextPos = {}
 let lastPosition = null
 async function lookAtArtifact(params, firstStep) {
+
     if (selectSpot) {
+        document.getElementById('lookAt').innerHTML = selectSpot
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
         lastPosition = selectSpot
 
         artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
-                console.log('got....', element.name)
+
                 nextPos.x = element.position.x
                 nextPos.z = element.position.z
             }
         })
-
-        //  console.log(nextPos)
-        if (between(selectSpot, 0, 9)) {
+        if (between(selectSpot, 0, 10)) {
             cameraStand.position.set(nextPos.x - 30, cameraHeight, nextPos.z)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
             }
         }
-        if (between(selectSpot, 9, 16)) {
+        if (between(selectSpot, 11, 14)) {
             cameraStand.position.set(nextPos.x, cameraHeight, nextPos.z - 30)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
@@ -739,6 +727,7 @@ async function lookAtArtifact(params, firstStep) {
         }
         if (between(selectSpot, 15, 25)) {
             cameraStand.position.set(nextPos.x + 30, cameraHeight, nextPos.z)
+            // alert('me')
             // cameraStand.lookAt(centerBox.position.x, centerBox.position.y, centerBox.position.z)
             if (!testing) {
                 await cameraControls.setLookAt(cameraStand.position.x, cameraHeight, cameraStand.position.z, nextPos.x, cameraHeight, nextPos.z, true)
