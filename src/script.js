@@ -7,6 +7,7 @@ CameraControls.install({ THREE: THREE });
 import { makeTextSprite } from './makeTextSprite.js'
 import { enterDoor } from './animations.js'
 import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
+import infoPointImage from './images/infoPoint.png'
 import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import positions from './positions.json'
@@ -69,7 +70,6 @@ var cube = [];
 const wallMountedGeometry = new THREE.BoxGeometry(1, 20, 20)
 const pedestalGeometry = new THREE.CylinderGeometry(5, 5, 8, 10);
 const material1 = new THREE.MeshStandardMaterial({ color: 0xcfc4a0 })
-//const positions = [{ "x": 29, "y": 8, "z": -118 }, { "x": 29, "y": 8, "z": -86 }, { "x": 29, "y": 8, "z": -54 }, { "x": 29, "y": 8, "z": -22 }, { "x": 29, "y": 8, "z": 10 }, { "x": 20, "y": -2.5, "z": 42 }, { "x": 20, "y": -2.5, "z": 74 }, { "x": 20, "y": -2.5, "z": 106 }, { "x": 20, "y": -2.5, "z": 138 }, { "x": 20, "y": -2.5, "z": 170 }, { "x": -89.56, "y": 8, "z": 178 }, { "x": -89.56, "y": 8, "z": 146 }, { "x": -89.56, "y": 8, "z": 114 }, { "x": -89.56, "y": 8, "z": 82 }, { "x": -89.56, "y": 8, "z": 50 }, { "x": -83, "y": -2.5, "z": 18 }, { "x": -83, "y": -2.5, "z": -14 }, { "x": -83, "y": -2.5, "z": -46 }, { "x": -83, "y": -2.5, "z": -78 }, { "x": -83, "y": -2.5, "z": -110 }]
 let artifacts = []
 let sprites = []
 let infoPoints = []
@@ -84,6 +84,10 @@ document.getElementById("infoButton").addEventListener("click", toggleHowTo);
 document.getElementById("menuButton").addEventListener("click", toggleMenu);
 document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
+window.addEventListener('resize', onWindowResize, false);
+document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
+
+// DEV OPTIONS
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'settings') {
     gui = new dat.GUI();
     showSettings = true
@@ -97,35 +101,40 @@ if (window.location.hash.substr(1).length && window.location.hash.substr(1) == '
     document.getElementById('testmode').style.display = 'block'
     document.getElementById('welcomeScreen').style.display = 'none';
 }
-const colorTexture = textureLoader.load(woodenFloor)
-const bumpmap = textureLoader.load(woodenFloorBump)
-colorTexture.wrapS = THREE.RepeatWrapping
-colorTexture.wrapT = THREE.RepeatWrapping
-colorTexture.repeat.x = 20
-colorTexture.repeat.y = 11
-colorTexture.rotation = Math.PI / 2
-//console.log(colorTexture)
-bumpmap.wrapS = THREE.RepeatWrapping
-bumpmap.wrapT = THREE.RepeatWrapping
-bumpmap.repeat.x = 20
-bumpmap.repeat.y = 11
-bumpmap.rotation = Math.PI / 2
-const geometry = new THREE.PlaneBufferGeometry(150, 600);
-const material = new THREE.MeshPhysicalMaterial({ map: colorTexture })
-material.displacementMap = bumpmap
-const floor = new THREE.Mesh(geometry, material);
-floor.rotation.set(-Math.PI / 2, 0, 0)
-floor.position.set(-25, -6.5, 0)
-floor.name = 'floor'
-scene.add(floor);
+
+
+
 if (!testing) {
+    const geometry = new THREE.PlaneBufferGeometry(150, 600);
     const ceilingMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#171616' })
-    ceilingMaterial.displacementMap = bumpmap
     const ceiling = new THREE.Mesh(geometry, ceilingMaterial);
     ceiling.rotation.set(-Math.PI / 2, 0, 0)
     ceiling.position.set(-25, 24.210, 0)
     ceiling.name = 'ceiling'
     scene.add(ceiling);
+} else {
+    // LOAD TEXTURES
+    const colorTexture = textureLoader.load(woodenFloor)
+    const bumpmap = textureLoader.load(woodenFloorBump)
+    colorTexture.wrapS = THREE.RepeatWrapping
+    colorTexture.wrapT = THREE.RepeatWrapping
+    colorTexture.repeat.x = 20
+    colorTexture.repeat.y = 11
+    colorTexture.rotation = Math.PI / 2
+    //console.log(colorTexture)
+    bumpmap.wrapS = THREE.RepeatWrapping
+    bumpmap.wrapT = THREE.RepeatWrapping
+    bumpmap.repeat.x = 20
+    bumpmap.repeat.y = 11
+    bumpmap.rotation = Math.PI / 2
+
+    const material = new THREE.MeshPhysicalMaterial({ map: colorTexture })
+    material.displacementMap = bumpmap
+    const floor = new THREE.Mesh(geometry, material);
+    floor.rotation.set(-Math.PI / 2, 0, 0)
+    floor.position.set(-25, -6.5, 0)
+    floor.name = 'floor'
+    scene.add(floor);
 }
 const ambientLight = new THREE.HemisphereLight(
     0xFFFFFF, // bright sky color
@@ -202,22 +211,32 @@ function sideMoves(event) {
     }
 }
 // INFO WINDOW
-document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
+
 function closeInfoWindow() {
     const infoWin = document.getElementById('infoWindow')
-    gsap.to(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 0.3 })
+    gsap.to(infoWin, { display: 'none', x: -400, opacity: 0, duration: 0.3 })
     infoWindowOpen = false
     if (selectSpot) {
         showArrows()
     }
 }
-const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
-const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, color: '#000' })
+
+
+
+
 function makeInfoPoint(location, name, wallmount) {
+
+    const colorTexture = textureLoader.load(infoPointImage)
+    console.log(colorTexture)
+    const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
+    const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: colorTexture})
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
+
     infoPoint.position.copy(positions[location])
     infoPoint.position.y = 10
     infoPoint.name = name
+
+
     if (between(location, 0, 9)) {
         infoPoint.name = 'infoPoint' + location
         if (wallmount) {
@@ -226,9 +245,11 @@ function makeInfoPoint(location, name, wallmount) {
         infoPoint.position.x = 30
         infoPoint.position.z += 8
         infoPoint.rotation.y = Math.PI / 2
+        infoPoint.scale.x = -1
         // infoPoint.position.x 
     }
     if (between(location, 10, 14)) {
+        infoPoint.scale.x = -1
         infoPoint.position.z = 212
         if (wallmount) {
             infoPoint.position.x -= 13
@@ -245,6 +266,8 @@ function makeInfoPoint(location, name, wallmount) {
             infoPoint.position.z -= 8
         }
     }
+
+
     infoPoints.push(infoPoint)
     scene.add(infoPoint)
 }
@@ -354,9 +377,7 @@ function dynamicSort(property) {
         property = property.substr(1);
     }
     return function (a, b) {
-        /* next line works with strings and numbers, 
-         * and you may want to customize it to your needs
-         */
+
         var result = (a.userData[property] < b.userData[property]) ? -1 : (a.userData[property] > b.userData[property]) ? 1 : 0;
         return result * sortOrder;
     }
@@ -427,7 +448,7 @@ function loadartifacts(params) {
         }
         // finished
         if (i == database.length - 1) {
-            artifacts.sort(dynamicSort("location")); // reforder the array for easy location find
+            artifacts.sort(dynamicSort("location")); // reorder the array for easy location find
             artifacstLoaded = true
             //   lCount = true
         }
@@ -470,7 +491,6 @@ function onDocumentMouseDown(event) {
         var intersectsInfo = raycaster.intersectObjects(infoPoints);
         var intersects = raycaster.intersectObjects(sprites);
         if (intersects.length > 0) {
-            // outlinePass.selectedObjects = artifacts
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 showArrows()
                 selectSpot = parseInt(intersects[0].object.userData.id + 1)
@@ -538,6 +558,8 @@ const cameraControls = testing ? new OrbitControls(camera, renderer.domElement) 
 document.getElementById("goback").addEventListener("click", turnAround);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.addEventListener('mousedown', onDocumentMouseDown, false);
+document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
+document.getElementById("closeHowTo").addEventListener("click", toggleHowTo);
 start.addEventListener("click", beginTour);
 // create text labels
 zoneTitles.forEach((zone, i) => {
@@ -663,7 +685,7 @@ async function lookAtArtifact(params, firstStep) {
 
 
     if (selectSpot) {
-        document.getElementById("mainCanvas").style.cursor = "initial"; 
+        document.getElementById("mainCanvas").style.cursor = "initial";
         if (document.getElementById('lookAround').style.display == 'block') {
             gsap.to('#lookAround', { opacity: 0, display: 'none', pointerEvents: 'none' })
         }
@@ -713,22 +735,17 @@ async function lookAtArtifact(params, firstStep) {
             cameraControls.dollyTo(3, true);
             cameraControls.fitToBox(cameraStand, true);
             cameraControls.enabled = true
-            document.getElementById("mainCanvas").style.cursor = "move"; 
+            document.getElementById("mainCanvas").style.cursor = "move";
             lastPosition = null
             waiting = false
         }
     }
 }
-document.getElementById("closeHowTo").addEventListener("click", closeHowTo);
-function closeHowTo() {
-    gsap.to('.howto', {
-        display: 'none', autoAlpha: 0, x: 100, duration: 0.5
-    })
-}
+
+
 function enterGallery() {
-    gsap.to('.howto', {
-        display: 'none', autoAlpha: 0, x: 100, duration: 0.5
-    })
+
+    toggleHowTo()
     gsap.to('#menuButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
     gsap.to('#infoButton', { display: 'block', opacity: 1, delay: 1, duration: 1 })
     gsap.to(scene.getObjectByName('Glass_Door_Right').position, {
@@ -809,14 +826,12 @@ function toggleMenu() {
     }
 }
 function toggleHowTo() {
-    const sideMenu = document.getElementById('infoWindow')
-    const button = document.getElementById('menuButton').children[0];
+    const sideMenu = document.getElementById('howToWindow')
+    console.log(sideMenu.style.display)
     if (sideMenu.style.display == 'none') {
-        button.classList.add('open')
-        gsap.to(sideMenu, { opacity: 1, x: 0, display: 'block', duration: 0.5 })
+        gsap.to(sideMenu, { display: 'block', autoAlpha: 1, x: 0, duration: 0.5 })
     } else {
-        button.classList.remove('open')
-        gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
+        gsap.to(sideMenu, { display: 'none', autoAlpha: 0, x: 100, duration: 0.5 })
     }
 }
 function openInfoWindow() {
@@ -848,24 +863,15 @@ function openInfoWindow() {
     } else {
         footer.style.display = 'none'
     }
-    gsap.fromTo(infoWin, { display: 'none', scale: 0.3, x: 400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, scale: 1, opacity: 1 })
+    gsap.fromTo(infoWin, { display: 'none', x: -400, opacity: 0, duration: 1.5 }, { display: 'block', x: 0, opacity: 1 })
     hideArrows()
     infoWindowOpen = true
 }
 function showArrows() {
     if (!testing) {
         backButton.style.display = 'block'
-        // if (selectSpot > 0) {
         gsap.to('#left', { x: 0, opacity: 1, duration: 1, display: 'block' })
-        //} else {
-        //left.style.display = 'none'
-        //}
-        //if (selectSpot <= artifacts.length) {
         gsap.to('#right', { x: 0, opacity: 1, duration: 1, display: 'block' })
-        //} else {
-        //right.style.display = 'none'
-        //}
-        // alert(selectSpot)
         gsap.to('#goback', { y: 0, opacity: 1, duration: 1 })
         cameraControls.enabled = false
     }
@@ -884,8 +890,8 @@ function hideArrows() {
         }
     })
 }
-document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
-window.addEventListener('resize', onWindowResize, false);
+
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();

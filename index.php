@@ -13,7 +13,7 @@
         <img class="infoButton" src="<?php bloginfo('template_directory'); ?>/src/images/info.svg" width="300" alt="How to">
     </div>
 </div>
-<div class="howto welcome" style="display: none;">
+<div id="howToWindow" class="howto welcome" style="display: none;">
     <p class="mb-4 h1">How to</p>
     <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,</p>
     <button id="enterGallery">GOT IT</button>
@@ -69,6 +69,7 @@
         </div>
     </div>
 </div>
+
 <div id="infoWindow" class="infoWindow  text-black">
     <div class="pb-5 px-5" style="min-height: calc(100vh - 156px)">
         <div class="infoWindow__infoTitleBox">
@@ -87,15 +88,17 @@
     </div>
 </div>
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
+
+<!-- three canvas -->
 <canvas id="mainCanvas" class="webgl">
 </canvas>
 
 
+<!-- nav buttons -->
 <span id="goback" style="display: none"></span>
 <span id="lookAround" style="display: none"></span>
 <span id="left" style="transform: scaleX(-1); display: none"></span>
 <span id="right" style="display: none"></span>
-
 
 <div id="controls" class="controls d-none"></div>
 </body>
