@@ -41,7 +41,7 @@
     </div>
 </div>
 <div id="welcomeScreen" class="welcomeScreen">
-    <div class="welcomeScreen__inner">
+    <div id="welcomeScreenInner" class="welcomeScreen__inner">
         <div class="container">
             <div class="welcomeScreen__innerTop blackBack">
                 <div class="welcomeScreen__innerTop__text">
@@ -63,7 +63,7 @@
             </div>
         </div>
     </div>
-    <div class="welcomeScreen__footer py-4 mt-5">
+    <div id="welcomeScreenFooter"  class="welcomeScreen__footer py-4">
         <div class="container">
             <img class="logo" src="<?php bloginfo('template_directory'); ?>/src/images/logo.svg" width="300" alt="National paralympic heritage trust logo">
         </div>
@@ -87,7 +87,7 @@
     </div>
 </div>
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
-<canvas class="webgl">
+<canvas id="mainCanvas" class="webgl">
 </canvas>
 
 

@@ -44,22 +44,12 @@
 
 .welcomeScreen {
     overflow-x: hidden;
-    @media (min-width: 768px) {
-        position: fixed;
-        min-height: 100vh;
-    }
-    @media (max-width: 768px) {
-        position: fixed;
-        display: block;
-        min-height: 100%;
-        max-height: calc(100% - 500px);
-        overflow-y: auto;
-    }
+    height: 100%;
     background-color: $black;
     width: 100%;
     z-index: 9990;
     vertical-align: bottom;
-    min-height: 700px;
+    position: fixed;
     overflow-y: scroll;
     &__innerTop {
         // Medium devices (tablets, 768px and up)
@@ -76,20 +66,11 @@
     }
     &__footer {
         background: #fff;
-        @media (min-width: 768px) {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            .logo {
-                max-width: 200px;
-            }
-        }
-        @media (max-width: 768px) {
-            position: relative;
-            display: block;
-            .logo {
-                max-width: 165px;
-            }
+        position: relative;
+        bottom: 0;
+        left: 0;
+        .logo {
+            max-width: 200px;
         }
         width: 100%;
     }

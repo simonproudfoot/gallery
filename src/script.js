@@ -78,14 +78,12 @@ var x = 10
 var i = 1
 let gui = null
 let showSettings = false
-
 // LISTENERS
 document.getElementById("enterGallery").addEventListener("click", enterGallery);
 document.getElementById("infoButton").addEventListener("click", toggleHowTo);
 document.getElementById("menuButton").addEventListener("click", toggleMenu);
 document.getElementById("left").addEventListener("click", sideMoves);
 document.getElementById("right").addEventListener("click", sideMoves);
-
 if (window.location.hash.substr(1).length && window.location.hash.substr(1) == 'settings') {
     gui = new dat.GUI();
     showSettings = true
@@ -148,8 +146,6 @@ if (!testing) {
     },
     );
 }
-
-
 // Create center reference box
 const centerBox = new THREE.Mesh(
     new THREE.BoxGeometry(5, 5, 5),
@@ -157,8 +153,6 @@ const centerBox = new THREE.Mesh(
 );
 centerBox.position.set(roomCenter.x, roomCenter.y, roomCenter.z)
 scene.add(centerBox);
-
-
 // lights
 const guttmanLight = new THREE.RectAreaLight(0xEBFAFF, 7, 300, 10)
 guttmanLight.name = 'guttmanLight'
@@ -184,17 +178,14 @@ await axios.get(afcUrl)
         console.log(error);
     })
     .then(function () {
-
         loadartifacts()
     });
 // MOVE ALONG
-
 function sideMoves(event) {
     const indexIs = (element) => element.location == selectSpot;
     let currentIndex = database.findIndex(indexIs)
     let nextIndex = database.findIndex(indexIs) + 1
     let prevIndex = database.findIndex(indexIs) - 1
-
     if (event.target.id == 'right') {
         if (database[nextIndex] != undefined) {
             selectSpot = database[nextIndex].location
@@ -202,7 +193,6 @@ function sideMoves(event) {
             selectSpot = database[0].location
         }
     }
-
     if (event.target.id == 'left') {
         if (selectSpot != 1) {
             selectSpot = database[prevIndex].location
@@ -210,8 +200,6 @@ function sideMoves(event) {
             selectSpot = database.slice(-1).pop().location
         }
     }
-
-
 }
 // INFO WINDOW
 document.getElementById("infoClose").addEventListener("click", closeInfoWindow);
@@ -230,7 +218,6 @@ function makeInfoPoint(location, name, wallmount) {
     infoPoint.position.copy(positions[location])
     infoPoint.position.y = 10
     infoPoint.name = name
-
     if (between(location, 0, 9)) {
         infoPoint.name = 'infoPoint' + location
         if (wallmount) {
@@ -249,7 +236,6 @@ function makeInfoPoint(location, name, wallmount) {
             infoPoint.position.x -= 8
         }
     }
-
     if (between(location, 15, 24)) {
         infoPoint.rotation.y = Math.PI / 2
         infoPoint.position.x = -89.380
@@ -262,14 +248,12 @@ function makeInfoPoint(location, name, wallmount) {
     infoPoints.push(infoPoint)
     scene.add(infoPoint)
 }
-
 function makeSprite(location, position, i) {
     var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     var spritey = makeTextSprite('', colors[i]);
     spritey.userData.id = parseInt(location)
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
-
     if (between(location, 0, 9)) {
         spritey.position.x -= 10
     }
@@ -282,13 +266,10 @@ function makeSprite(location, position, i) {
     sprites.push(spritey)
     scene.add(spritey);
 }
-
-
 function makeLight(location, position) {
     const rectAreaLight = new THREE.RectAreaLight(0xffffff, 5, 5, 30)
     rectAreaLight.position.copy(position)
     rectAreaLight.position.y += 20
-
     if (between(location, 0, 9)) {
         rectAreaLight.rotation.y = -Math.PI / 2
         rectAreaLight.position.x -= 20
@@ -304,8 +285,6 @@ function makeLight(location, position) {
     rectAreaLight.name = 'light-' + location
     scene.add(rectAreaLight)
 }
-
-
 function makeMenuItem(title, position, i) {
     // add items to menu
     var modList = document.getElementById('menuItems')
@@ -322,12 +301,9 @@ function makeMenuItem(title, position, i) {
     newLI.appendChild(newSprite)
     document.getElementById('artifact-' + position).addEventListener("click", selectObjectFromMenu);
 }
-
 function between(x, min, max) {
     return x >= min && x <= max;
 }
-
-
 function calcPesistalPosition(position, location) {
     if (between(location, 0, 9)) {
         position.x -= 10
@@ -341,8 +317,6 @@ function calcPesistalPosition(position, location) {
     }
     return position
 }
-
-
 function calcWallmountRotation(location) {
     var rotation;
     if (between(location, 0, 9)) {
@@ -356,8 +330,6 @@ function calcWallmountRotation(location) {
     }
     return rotation
 }
-
-
 function makePedistal(position, location) {
     // create a pedistal
     var newArtifact = new THREE.Mesh(pedestalGeometry, material1);
@@ -366,8 +338,6 @@ function makePedistal(position, location) {
     newArtifact.position.y = -2.2 // sit on floot
     scene.add(newArtifact)
 }
-
-
 function makeWallMount(location) {
     // create a pedistal
     const position = positions[location]
@@ -377,8 +347,6 @@ function makeWallMount(location) {
     scene.add(newWallmount)
     return newWallmount
 }
-
-
 function dynamicSort(property) {
     var sortOrder = 1;
     if (property[0] === "-") {
@@ -393,8 +361,6 @@ function dynamicSort(property) {
         return result * sortOrder;
     }
 }
-
-
 function loadartifacts(params) {
     database.forEach(async (element, i) => {
         // LOAD artifacts
@@ -457,7 +423,6 @@ function loadartifacts(params) {
                 }
                 mount.scale.set(1.0, imgSize, 1.0);
                 artifacts.push(mount)
-
             });
         }
         // finished
@@ -468,8 +433,6 @@ function loadartifacts(params) {
         }
     })
 }
-
-
 // Camera
 const camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 1, 1000);
 scene.add(camera)
@@ -494,11 +457,9 @@ function selectObjectFromMenu() {
     const open = document.getElementById('menu').classList.contains('open')
     selectSpot = val
     toggleMenu()
-
     setTimeout(() => {
         showArrows()
     }, 1000);
-
 }
 function onDocumentMouseDown(event) {
     if (!event.target.classList.contains('allowClick')) {
@@ -543,7 +504,6 @@ compose.render(scene, camera)
 let hoverSpot = ''
 console.log(outlinePass)
 document.addEventListener('mousemove', onMouseMove, false);
-
 function onMouseMove(event) {
     sprites.forEach(i => i.material.color.set(0xffffff));
     if (!intro && !selectSpot) {
@@ -581,32 +541,25 @@ document.addEventListener('mousedown', onDocumentMouseDown, false);
 start.addEventListener("click", beginTour);
 // create text labels
 zoneTitles.forEach((zone, i) => {
-
     var wrapper = document.createElement('div');
     wrapper.classList.add('zoneTitles')
     document.body.appendChild(wrapper);
-
     var ele = document.createElement('h1');
     ele.innerHTML = zone.zone
     wrapper.appendChild(ele);
-
     var canvas = document.createElement('canvas');
     wrapper.appendChild(canvas);
-
     var img = document.createElement('img');
     wrapper.appendChild(img);
-
     var context = canvas.getContext("2d");
     context.font = "30px gothammedium";
     context.fillStyle = "#000";
-
     if (ele.textContent) {
         // for firefox
         context.fillText(ele.textContent, 0, canvas.height / 2);
     } else {
         context.fillText(ele.innerText, 0, canvas.height / 2);
     }
-
     //onsole.log(canvas.toDataURL('image/png'))
     img.src = canvas.toDataURL('image/png');
     const title = textureLoader.load(img.src)
@@ -618,7 +571,6 @@ zoneTitles.forEach((zone, i) => {
         side: THREE.DoubleSide,
         alphaTest: 0.5
     });
-
     const plane = new THREE.Mesh(geometry, material);
     plane.position.y = 18
     plane.name = 'title:' + ele.innerHTML
@@ -646,7 +598,6 @@ zoneTitles.forEach((zone, i) => {
         plane.position.set(-87.890, 18.990, -107.880)
         plane.rotation.y = Math.PI / 2
     }
-
     scene.add(plane);
 })
 // ZONE LIGHTS
@@ -701,26 +652,28 @@ function customFitTo() {
         cameraStand.position.z + distanceToFit,
         true
     );
-
-
 }
 if (!testing) {
     cameraControls.setPosition(0, cameraHeight, -210)
 }
-
 let nextPos = {}
 let lastPosition = null
 async function lookAtArtifact(params, firstStep) {
 
+
+
     if (selectSpot) {
+        document.getElementById("mainCanvas").style.cursor = "initial"; 
+        if (document.getElementById('lookAround').style.display == 'block') {
+            gsap.to('#lookAround', { opacity: 0, display: 'none', pointerEvents: 'none' })
+        }
+
         document.getElementById('lookAt').innerHTML = selectSpot
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
         lastPosition = selectSpot
-
         artifacts.forEach((element, i) => {
             if (element.userData.location == location) {
-
                 nextPos.x = element.position.x
                 nextPos.z = element.position.z
             }
@@ -760,6 +713,7 @@ async function lookAtArtifact(params, firstStep) {
             cameraControls.dollyTo(3, true);
             cameraControls.fitToBox(cameraStand, true);
             cameraControls.enabled = true
+            document.getElementById("mainCanvas").style.cursor = "move"; 
             lastPosition = null
             waiting = false
         }
@@ -792,11 +746,7 @@ function enterGallery() {
     })
 }
 async function turnAround() {
-
     hideArrows()
-
-
-
     selectSpot = null
     waiting = true
 }
@@ -846,7 +796,6 @@ const animate = () => {
 animate()
 // unhide doc
 document.body.style.display = 'block'
-
 // menus
 function toggleMenu() {
     const sideMenu = document.getElementById('menu')
@@ -859,7 +808,6 @@ function toggleMenu() {
         gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
     }
 }
-
 function toggleHowTo() {
     const sideMenu = document.getElementById('infoWindow')
     const button = document.getElementById('menuButton').children[0];
@@ -871,38 +819,25 @@ function toggleHowTo() {
         gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
     }
 }
-
-
-
 function openInfoWindow() {
-
     const indexIs = (element) => element.location == selectSpot;
     let currentIndex = database.findIndex(indexIs)
     let nextIndex = database.findIndex(indexIs) + 1
     let prevIndex = database.findIndex(indexIs) - 1
-
-
     let footer = document.getElementById('infoWindow__footer')
     let contentTitle = ''
     let contentDisc = ''
     let next = {}
-
     next.title = database[nextIndex].artifact_title
     next.location = database[nextIndex].location
-
-
-
     const infoWin = document.getElementById('infoWindow')
     const title = document.getElementById('infoTitle')
     const disc = document.getElementById('infoDisc')
     const nextStory = document.getElementById('nextStory')
-
     if (database.find(x => x.is_model == false) && database.find(x => x.location == selectSpot)) {
         contentTitle = database.find(x => x.location == selectSpot).artifact_title
         contentDisc = database.find(x => x.location == selectSpot).artifact_description
-
     }
-
     disc.innerHTML = contentDisc
     title.innerHTML = contentTitle
     if (next.title) {
@@ -917,9 +852,6 @@ function openInfoWindow() {
     hideArrows()
     infoWindowOpen = true
 }
-
-
-
 function showArrows() {
     if (!testing) {
         backButton.style.display = 'block'
@@ -944,19 +876,13 @@ function hideArrows() {
     gsap.to('#goback', {
         y: 100, opacity: 0, duration: 1, onComplete: () => {
             gsap.to('#lookAround', { display: 'block', opacity: 1, duration: 0.4 })
-
             gsap.fromTo('#lookAround', { x: -50, rotateX: -1, }, {
                 ease: Power1.easeInOut, x: 50, rotateX: 1, yoyo: true, duration: 0.3, repeat: 5, onComplete: () => {
                     gsap.to('#lookAround', { display: 'none', x: 0, opacity: 0, duration: 0.4 })
                 }
             });
-
-
-
         }
     })
-
-
 }
 document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
 window.addEventListener('resize', onWindowResize, false);
@@ -978,3 +904,13 @@ function spriteOff() {
         }
     });
 }
+
+
+
+
+// sticky footers
+let welcomeScreen = document.getElementById('welcomeScreenInner')
+let welcomeScreenFooterHeight = document.getElementById('welcomeScreenFooter').clientHeight
+
+welcomeScreen.style.marginBottom = welcomeScreenFooterHeight + 50
+
