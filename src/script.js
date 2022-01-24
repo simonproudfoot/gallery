@@ -231,7 +231,7 @@ function makeInfoPoint(location, name, wallmount) {
     const colorTexture = textureLoader.load(infoPointImage)
     console.log(colorTexture)
     const infoPointGeometry = new THREE.PlaneBufferGeometry(3, 5);
-    const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: colorTexture})
+    const infoPointMaterial = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: colorTexture })
     let infoPoint = new THREE.Mesh(infoPointGeometry, infoPointMaterial);
 
     infoPoint.position.copy(positions[location])
@@ -528,17 +528,18 @@ console.log(outlinePass)
 document.addEventListener('mousemove', onMouseMove, false);
 function onMouseMove(event) {
     sprites.forEach(i => i.material.color.set(0xffffff));
-    if (!intro && !selectSpot) {
+    if (stepTwoDone && !selectSpot) {
         // calculate mouse position in normalized device coordinates
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         var intersects = raycaster.intersectObjects(sprites);
-        // var intersectsA = raycaster.intersectObjects(infoPoints)
+        var intersectsA = raycaster.intersectObjects(infoPoints)
         if (intersects.length > 0) {
-            document.body.style.cursor = "pointer";
+
             for (var i = 0; intersects.length > 0 && i < intersects.length; i++) {
                 var hoverSpot = parseInt(intersects[0].object.userData.id)
                 artifacts.forEach((element, i) => {
+                    document.body.style.cursor = "pointer !important";
                     if (element.userData.id == hoverSpot) {
                         outlinePass.selectedObjects.push(element)
                     }
@@ -817,18 +818,22 @@ document.body.style.display = 'block'
 // menus
 function toggleMenu() {
     const sideMenu = document.getElementById('menu')
+
     const button = document.getElementById('menuButton').children[0];
+
     if (sideMenu.style.display == 'none') {
         button.classList.add('open')
+        document.getElementById('infoButton').style.display = 'none'
         gsap.to(sideMenu, { opacity: 1, x: 0, display: 'block', duration: 0.5 })
     } else {
         button.classList.remove('open')
+        document.getElementById('infoButton').style.display = 'block'
         gsap.to(sideMenu, { opacity: 0, x: 300, display: 'none' })
     }
 }
 function toggleHowTo() {
     const sideMenu = document.getElementById('howToWindow')
-    console.log(sideMenu.style.display)
+
     if (sideMenu.style.display == 'none') {
         gsap.to(sideMenu, { display: 'block', autoAlpha: 1, x: 0, duration: 0.5 })
     } else {
@@ -922,7 +927,8 @@ function spriteOff() {
 
 // sticky footers
 let welcomeScreen = document.getElementById('welcomeScreenInner')
+let welcomeScreenHeight = document.getElementById('welcomeScreenInner').clientHeight
 let welcomeScreenFooterHeight = document.getElementById('welcomeScreenFooter').clientHeight
-
-welcomeScreen.style.marginBottom = welcomeScreenFooterHeight + 50
+console.log('height', window.innerHeight - welcomeScreenFooterHeight)
+welcomeScreen.style.minHeight = window.innerHeight - welcomeScreenFooterHeight + 'px'
 

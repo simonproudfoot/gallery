@@ -63,7 +63,7 @@
             </div>
         </div>
     </div>
-    <div id="welcomeScreenFooter"  class="welcomeScreen__footer py-4">
+    <div id="welcomeScreenFooter"  class="welcomeScreen__footer py-4 mt-5">
         <div class="container">
             <img class="logo" src="<?php bloginfo('template_directory'); ?>/src/images/logo.svg" width="300" alt="National paralympic heritage trust logo">
         </div>
