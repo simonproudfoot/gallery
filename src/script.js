@@ -277,6 +277,7 @@ function makeSprite(location, position, i) {
     var ranHex = '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0');
     var spritey = makeTextSprite('', colors[i]);
     spritey.userData.id = parseInt(location)
+    spritey.userData.color = colors[i]
     if (!testing) { spritey.visible = false }
     spritey.position.copy(position)
     if (between(location, 0, 9)) {
@@ -852,6 +853,7 @@ function openInfoWindow() {
     let prevIndex = database.findIndex(indexIs) - 1
     let footer = document.getElementById('infoWindow__footer')
     let contentTitle = ''
+    let color;
     let contentDisc = ''
     let next = {}
     next.title = database[nextIndex] ? database[nextIndex].artifact_title : null
@@ -860,17 +862,23 @@ function openInfoWindow() {
     const title = document.getElementById('infoTitle')
     const disc = document.getElementById('infoDisc')
     const nextStory = document.getElementById('nextStory')
+    const footerNext = document.getElementById('footerNext')
     if (database.find(x => x.is_model == false) && database.find(x => x.location == selectSpot)) {
         contentTitle = database.find(x => x.location == selectSpot).artifact_title
         contentDisc = database.find(x => x.location == selectSpot).artifact_description
+        color = sprites[currentIndex].userData.color
+
     }
     disc.innerHTML = contentDisc
     title.innerHTML = contentTitle
     if (next.title) {
+        document.getElementById('sideLine').style.borderColor = color
         footer.style.display = 'block'
         nextStory.innerHTML = next.title
-        nextStory.setAttribute("data-artifact", + next.location);
-        nextStory.addEventListener("click", selectObjectFromInfo);
+        footerNext.setAttribute("data-artifact", + next.location);
+        footerNext.addEventListener("click", selectObjectFromInfo);
+        
+
     } else {
         footer.style.display = 'none'
     }
@@ -902,7 +910,6 @@ function hideArrows() {
     })
 }
 
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -930,5 +937,5 @@ let welcomeScreen = document.getElementById('welcomeScreenInner')
 let welcomeScreenHeight = document.getElementById('welcomeScreenInner').clientHeight
 let welcomeScreenFooterHeight = document.getElementById('welcomeScreenFooter').clientHeight
 console.log('height', window.innerHeight - welcomeScreenFooterHeight)
-welcomeScreen.style.minHeight = window.innerHeight - welcomeScreenFooterHeightsty + 'px'
+welcomeScreen.style.minHeight = window.innerHeight - welcomeScreenFooterHeight + 'px'
 

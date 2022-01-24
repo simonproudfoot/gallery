@@ -18,6 +18,7 @@
     &__footer {
         position: relative;
         cursor: pointer;
+        
 
         strong {
             font-family: "gothammedium";
@@ -27,6 +28,13 @@
         &__next {
             max-width: 400px;
             margin-left: auto;
+
+            *{
+                pointer-events: none;
+            }
+            &:hover{
+                background-color: #000 !important;
+            }
             // position: relative;
             &__arrow {
                 position: absolute;
@@ -36,7 +44,6 @@
                 width: 80px;
                 z-index: 99999;
                 background: transparent url("./images/arrowWhite.svg") no-repeat;
-
                 background-size: 17px;
                 background-position: center;
             }
@@ -45,7 +52,7 @@
     &__infoTitleBox {
         padding-left: 2em;
         padding-top: 60px;
-        border-left: 5px $yellow solid;
+        border-left: 7px $yellow solid;
     }
     &__content {
         margin-top: 1em;
