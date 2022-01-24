@@ -89,10 +89,14 @@
 <h1 id="testmode" style="display: none;">TEST MODE</h1>
 <canvas class="webgl">
 </canvas>
-<img id="goback" src="<?php bloginfo('template_directory'); ?>/src/images/turn.svg" width="100" height="100" style="display:none;">
-<img id="left" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move left icon" style="transform: scaleX(-1); display: none">
-</div>
-<img id="right" class="allowClick" src="<?php bloginfo('template_directory'); ?>/src/images/arrowWhite.svg" width="30" alt="Move right icon" style="display: none"></div>
+
+
+<span id="goback" style="display: none"></span>
+<span id="lookAround" style="display: none"></span>
+<span id="left" style="transform: scaleX(-1); display: none"></span>
+<span id="right" style="display: none"></span>
+
+
 <div id="controls" class="controls d-none"></div>
 </body>
 <?php get_template_part('/includes/footer'); ?>

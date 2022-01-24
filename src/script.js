@@ -10,7 +10,7 @@ import woodenFloor from './images/Wood_Floor_006_COLOR.jpg'
 import woodenFloorBump from './images/Wood_Floor_006_DISP.png'
 import { RenderPass, EffectComposer, OutlinePass } from "three-outlinepass"
 import positions from './positions.json'
-import gsap from 'gsap';
+import { gsap, Power1 } from 'gsap';
 import * as dat from 'dat.gui';
 let waiting;
 let stepOneDone = false
@@ -485,6 +485,10 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.physicallyCorrectLights = true
 // CLICK ON OBJECTS
+function selectObjectFromInfo() {
+    const val = event.target.attributes['data-artifact'].value
+    selectSpot = val
+}
 function selectObjectFromMenu() {
     const val = event.target.attributes['data-artifact'].value
     const open = document.getElementById('menu').classList.contains('open')
@@ -791,6 +795,8 @@ async function turnAround() {
 
     hideArrows()
 
+
+
     selectSpot = null
     waiting = true
 }
@@ -867,32 +873,43 @@ function toggleHowTo() {
 }
 
 
+
 function openInfoWindow() {
+
+    const indexIs = (element) => element.location == selectSpot;
+    let currentIndex = database.findIndex(indexIs)
+    let nextIndex = database.findIndex(indexIs) + 1
+    let prevIndex = database.findIndex(indexIs) - 1
+
+
     let footer = document.getElementById('infoWindow__footer')
     let contentTitle = ''
     let contentDisc = ''
     let next = {}
-    if (database.find(x => x.is_model) && database.find(x => x.location == selectSpot)) {
-        contentTitle = database.find(x => x.location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.location == selectSpot).artifact_description
-        next.title = database.find(x => x.location == selectSpot + 1) ? database.find(x => x.location == selectSpot + 1).artifact_title : ''
-    }
-    if (database.find(x => x.is_model == false) && database.find(x => x.location == selectSpot)) {
-        contentTitle = database.find(x => x.location == selectSpot).artifact_title
-        contentDisc = database.find(x => x.location == selectSpot).artifact_description
-        next.title = database.find(x => x.location == selectSpot + 1) ? database.find(x => x.location == selectSpot + 1).artifact_title : ''
-    }
+
+    next.title = database[nextIndex].artifact_title
+    next.location = database[nextIndex].location
+
+
+
     const infoWin = document.getElementById('infoWindow')
     const title = document.getElementById('infoTitle')
     const disc = document.getElementById('infoDisc')
     const nextStory = document.getElementById('nextStory')
+
+    if (database.find(x => x.is_model == false) && database.find(x => x.location == selectSpot)) {
+        contentTitle = database.find(x => x.location == selectSpot).artifact_title
+        contentDisc = database.find(x => x.location == selectSpot).artifact_description
+
+    }
+
     disc.innerHTML = contentDisc
     title.innerHTML = contentTitle
     if (next.title) {
         footer.style.display = 'block'
         nextStory.innerHTML = next.title
-        nextStory.setAttribute("data-artifact", +selectSpot + 1);
-        nextStory.addEventListener("click", selectObjectFromMenu);
+        nextStory.setAttribute("data-artifact", + next.location);
+        nextStory.addEventListener("click", selectObjectFromInfo);
     } else {
         footer.style.display = 'none'
     }
@@ -900,6 +917,9 @@ function openInfoWindow() {
     hideArrows()
     infoWindowOpen = true
 }
+
+
+
 function showArrows() {
     if (!testing) {
         backButton.style.display = 'block'
@@ -921,7 +941,22 @@ function showArrows() {
 function hideArrows() {
     gsap.to('#left', { x: -100, opacity: 0, duration: 1 })
     gsap.to('#right', { x: 100, opacity: 0, duration: 1 })
-    gsap.to('#goback', { y: 100, opacity: 0, duration: 1 })
+    gsap.to('#goback', {
+        y: 100, opacity: 0, duration: 1, onComplete: () => {
+            gsap.to('#lookAround', { display: 'block', opacity: 1, duration: 0.4 })
+
+            gsap.fromTo('#lookAround', { x: -50, rotateX: -1, }, {
+                ease: Power1.easeInOut, x: 50, rotateX: 1, yoyo: true, duration: 0.3, repeat: 5, onComplete: () => {
+                    gsap.to('#lookAround', { display: 'none', x: 0, opacity: 0, duration: 0.4 })
+                }
+            });
+
+
+
+        }
+    })
+
+
 }
 document.getElementById("infoWindow__footer").addEventListener("click", closeInfoWindow);
 window.addEventListener('resize', onWindowResize, false);

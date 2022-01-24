@@ -113,7 +113,30 @@ button {
   left: 0;
   right: 0;
   margin: auto;
+  background: transparent url("./images/arrowWhite.svg") no-repeat;
+  background-size: contain;
+  width: 45px;
+  height: 74px;
+  transform: rotate(90deg);
+  display: none;
 }
+
+#lookAround {
+
+  display: none;
+  position: fixed;
+  bottom: 44px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  background: transparent url("./images/moveIt.svg") no-repeat;
+  background-size: contain;
+  width: 45px;
+  height: 74px;
+  opacity: 0;
+}
+
+
 
 #left,
 #right {
@@ -122,6 +145,8 @@ button {
   width: 2em;
   top: 50%;
   transform: translateY(-50%);
+  background: transparent url("./images/arrowWhite.svg") no-repeat;
+  background-size: contain;
   z-index: 9999;
   &:hover {
     cursor: pointer;
@@ -154,6 +179,7 @@ button {
   height: 45px;
   display: none;
   z-index: 99999;
+  background-image: url("./images/info.svg");
 }
 
 .zoneTitles {
