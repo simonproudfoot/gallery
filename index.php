@@ -83,9 +83,10 @@
     </div>
     <div id="infoWindow__footer" class="infoWindow__footer">
         <div class="infoWindow__footer__next blackBack py-4 px-5"">
-            <p class=" text-muted mb-0">Jump to next story</p>
+            <p class="text-muted mb-0"><strong>Jump to next story</strong></p>
             <h4 id="nextStory" class="text-white"></h4>
             <span class="ring"></span>
+            <span class="infoWindow__footer__next__arrow"></span>
         </div>
     </div>
 </div>
