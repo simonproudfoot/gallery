@@ -51,6 +51,10 @@
     vertical-align: bottom;
     position: fixed;
     overflow-y: scroll;
+
+    p{
+        font-weight: 900;
+    }
     &__innerTop {
         // Medium devices (tablets, 768px and up)
         @media (min-width: 768px) {
@@ -93,7 +97,7 @@
     }
     background-color: $black;
     width: 100%;
-    z-index: 99999;
+    z-index: 99998;
     vertical-align: bottom;
     min-height: 700px;
     overflow-y: scroll;

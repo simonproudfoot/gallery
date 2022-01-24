@@ -47,6 +47,8 @@
                 <div class="welcomeScreen__innerTop__text">
                     <h4 class="text-white">Welcome</h4>
                     <h1 class="text-white display-1 pb-0 mb-0">Paralympic Heritage Virtual Exhibition</h1>
+
+                    <p class="text-white mt-5" style="max-width: 400px">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
                 </div>
             </div>
             <div class="welcomeScreen__innerBottom">

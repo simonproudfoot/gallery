@@ -33,7 +33,10 @@
 
 p {
   font-family: "gothamthin";
+ 
 }
+
+
 
 #wpadminbar {
   background-color: $yellow !important;
@@ -200,4 +203,9 @@ button {
   canvas {
     background-color: red;
   }
+}
+
+
+#infoClose{
+  background-color: transparent;
 }

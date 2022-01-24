@@ -930,5 +930,5 @@ let welcomeScreen = document.getElementById('welcomeScreenInner')
 let welcomeScreenHeight = document.getElementById('welcomeScreenInner').clientHeight
 let welcomeScreenFooterHeight = document.getElementById('welcomeScreenFooter').clientHeight
 console.log('height', window.innerHeight - welcomeScreenFooterHeight)
-welcomeScreen.style.minHeight = window.innerHeight - welcomeScreenFooterHeight + 'px'
+welcomeScreen.style.minHeight = window.innerHeight - welcomeScreenFooterHeightsty + 'px'
 
