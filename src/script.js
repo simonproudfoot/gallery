@@ -213,6 +213,8 @@ function sideMoves(event) {
 // INFO WINDOW
 
 function closeInfoWindow() {
+    document.getElementById('menuButton').style.display = 'block'
+    document.getElementById('infoButton').style.display = 'block'
     const infoWin = document.getElementById('infoWindow')
     gsap.to(infoWin, { display: 'none', x: -400, opacity: 0, duration: 0.3 })
     infoWindowOpen = false
@@ -690,7 +692,6 @@ async function lookAtArtifact(params, firstStep) {
             gsap.to('#lookAround', { opacity: 0, display: 'none', pointerEvents: 'none' })
         }
 
-        document.getElementById('lookAt').innerHTML = selectSpot
         outlinePass.selectedObjects = []
         const location = selectSpot - 1
         lastPosition = selectSpot
@@ -835,6 +836,11 @@ function toggleHowTo() {
     }
 }
 function openInfoWindow() {
+
+    document.getElementById('menuButton').style.display = 'none'
+    document.getElementById('infoButton').style.display = 'none'
+
+
     const indexIs = (element) => element.location == selectSpot;
     let currentIndex = database.findIndex(indexIs)
     let nextIndex = database.findIndex(indexIs) + 1
