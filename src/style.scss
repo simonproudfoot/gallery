@@ -161,6 +161,7 @@ button {
 }
 
 .howto {
+  overflow-y: auto;
   background-color: #fff;
   padding: 4rem;
   height: 100%;
@@ -169,6 +170,10 @@ button {
   top: 0;
   width: 50%;
   z-index: 9999;
+  @media (max-width: 768px) {
+    padding: 2em;
+    width: 70%;
+  }
 }
 
 .infoButton {

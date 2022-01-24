@@ -42,7 +42,7 @@ const start = document.getElementById('start')
 const textureLoader = new THREE.TextureLoader()
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
-const colors = ['#fffdf9', '#5bb5e7', '#159d74', '#d25e1a', '#ca7aa7', '#1074af', '#159d74', '#f5bb4a']
+const colors = ['#fffdf9', '#5bb5e7', '#159d74', '#d25e1a', '#ca7aa7', '#1074af', '#159d74', '#f5bb4a', '#fffdf9', '#5bb5e7', '#159d74', '#d25e1a', '#ca7aa7', '#1074af', '#159d74', '#f5bb4a', '#fffdf9', '#5bb5e7', '#159d74', '#d25e1a', '#ca7aa7', '#1074af', '#159d74', '#f5bb4a']
 var delta;
 var playing = false
 var intro = false
@@ -849,8 +849,8 @@ function openInfoWindow() {
     let contentTitle = ''
     let contentDisc = ''
     let next = {}
-    next.title = database[nextIndex].artifact_title
-    next.location = database[nextIndex].location
+    next.title = database[nextIndex] ? database[nextIndex].artifact_title : null
+    next.location = database[nextIndex] ? database[nextIndex].location : null
     const infoWin = document.getElementById('infoWindow')
     const title = document.getElementById('infoTitle')
     const disc = document.getElementById('infoDisc')
